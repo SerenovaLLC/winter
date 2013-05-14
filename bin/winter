@@ -1,6 +1,25 @@
 #!/usr/bin/env jruby
 
-require 'thor'
+# Trap interrupts to quit cleanly. See
+# # https://twitter.com/mitchellh/status/283014103189053442
+Signal.trap("INT") { exit 1 }
 
-puts 'hi'
+require 'bundler'
+require 'lib/cli'
 
+Winter::CLI.start
+
+def get_deps( manifest=nil ) 
+  if manifest
+    tmp = Bundler::load_gemspec( manifest )
+  else
+    tmp = Bundler::load 
+  end
+  
+  tmp.specs.each do |b|
+    puts b.name
+  end
+
+  tmp
+end
+#get_deps 

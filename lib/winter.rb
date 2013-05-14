@@ -1,5 +1,9 @@
 require "winter/version"
+require "winter/specfile"
 
 module Winter
-  # Your code goes here...
+
+  def self.assemble
+  end
+
 end
