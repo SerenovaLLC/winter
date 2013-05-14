@@ -1,25 +1,18 @@
-#!/usr/bin/env jruby
+#!/usr/bin/env ruby
 
 # Trap interrupts to quit cleanly. See
 # # https://twitter.com/mitchellh/status/283014103189053442
 Signal.trap("INT") { exit 1 }
 
-require 'bundler'
-require 'lib/cli'
+# TODO still required when running through rubygems?
+$:.unshift(File.dirname(__FILE__) + '/../lib')
+
+begin
+  require 'winter/cli'
+rescue
+  require 'rubygems'
+  require 'winter/cli'
+end
 
 Winter::CLI.start
 
-def get_deps( manifest=nil ) 
-  if manifest
-    tmp = Bundler::load_gemspec( manifest )
-  else
-    tmp = Bundler::load 
-  end
-  
-  tmp.specs.each do |b|
-    puts b.name
-  end
-
-  tmp
-end
-#get_deps 

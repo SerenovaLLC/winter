@@ -1,5 +1,5 @@
 require 'thor'
-require 'lib/dsl'
+require_relative 'dsl'
 
 module Winter
   class CLI < Thor

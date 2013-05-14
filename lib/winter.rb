@@ -1,5 +1,5 @@
 require "winter/version"
-require "winter/specfile"
+#require "winter/specfile"
 
 module Winter
 

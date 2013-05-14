@@ -1,7 +1,10 @@
 # This is the Domain Specific Language definition for the Winterfile
 
 require 'open-uri'
-require 'maven_gem'
+#require 'maven_gem'
+
+require 'pom_fetcher'
+require 'pom_spec'
 
 module Winter
   class Dsl
@@ -17,6 +20,10 @@ module Winter
       instance_eval(contents)
     end
 
+# **************************************************************************
+# Winterfile DSL spec
+# **************************************************************************
+    
     def say_hi
       puts 'hi'
     end
@@ -26,8 +33,14 @@ module Winter
         raise "Bundles must be URLs, paths to poms, or Strings"
       end
 
-      #pom_doc = MavenGem::PomFetcher.fetch(bundle)
-      #puts pom_doc.to_s
+      pom = MavenGem::PomFetcher.fetch(bundle)
+      pom_spec = MavenGem::PomSpec.parse_pom(pom)
+      #puts pom.to_s
+      pom_spec.dependencies.each do |dep|
+        puts dep
+      end
+      #spec = MavenGem::PomSpec.generate_spec(pom_doc)
+
     end
 
   end
