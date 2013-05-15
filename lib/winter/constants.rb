@@ -1,10 +1,10 @@
 
 #@wf_dir = File.dirname(File.expand_path File.dirname(__FILE__))
 WINTERFELL_DIR = ENV['WINTERFELL_DIR'] || '.'
-RUN_DIR = File.join(WINTERFELL_DIR,"run") || 'run'
+#RUN_DIR = File.join(WINTERFELL_DIR,"run") || 'run'
 
 SERVICES_DIR        = "services"
-#RUN_DIR             = "run"
+RUN_DIR             = "run"
 DEFAULT_CONF_DIR    = "defaults"
 TEMPLATES_DIR       = "templates"
 DAEMONTOOLS_DIR     = "/service"

@@ -2,7 +2,7 @@ require 'thor'
 #autoload :DSL,      'winter/dsl'
 require 'winter/dsl'
 require 'winter/stop'
-#require 'winter/status'
+require 'winter/status'
 require 'winter/list'
 
 module Winter
@@ -24,16 +24,17 @@ module Winter
       s = Winter::Service.new
       puts "\nValid services:"
       s.list.each do |i|
-      #services_list().each do |i|
         puts " #{i}"
       end
       puts ""
     end
 
-    desc "status", "Show status of available services (incomplete)"
+    desc "status", "Show status of available services"
     def status
       s = Winter::Service.new
-      s.status
+      s.status.each do |service, status|
+        puts " #{service} : #{status}"
+      end
     end
 
   end #class

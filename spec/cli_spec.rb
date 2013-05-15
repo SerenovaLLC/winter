@@ -25,4 +25,15 @@ describe Winter do
     end
   end
 
+  describe 'status' do
+    it "Shows the status of any running services" do
+      begin
+        lambda {
+          cli = Winter::CLI.new
+          cli.status
+        }.should_not raise_error
+      end
+    end
+  end
+
 end
