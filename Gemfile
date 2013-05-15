@@ -6,3 +6,7 @@ gemspec
 gem 'thor'
 gem 'bundler'
 gem 'maven_gem'
+
+group :test do
+  gem 'rspec'
+end

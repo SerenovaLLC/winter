@@ -6,7 +6,7 @@ module Winter
 
     desc "validate", "Check the configuration files"
     def validate( winterfile='Winterfile' )
-      Dsl.evaluate winterfile
+      DSL.evaluate winterfile
     end
 
   end #class

@@ -7,7 +7,11 @@ require 'pom_fetcher'
 require 'pom_spec'
 
 module Winter
-  class Dsl
+  class DSL
+
+    def initialize
+      @groups = []
+    end
 
     def self.evaluate( winterfile )
       # Must create instance for instance_eval to have correct scope
@@ -24,8 +28,8 @@ module Winter
 # Winterfile DSL spec
 # **************************************************************************
     
-    def say_hi
-      puts 'hi'
+    def info( msg=nil )
+      puts msg
     end
 
     def bundle( bundle, *args )
@@ -39,8 +43,13 @@ module Winter
       pom_spec.dependencies.each do |dep|
         puts dep
       end
-      #spec = MavenGem::PomSpec.generate_spec(pom_doc)
+    end
 
+    def group(*args, &blk)
+      @groups.concat args
+      yield
+    ensure
+      args.each { @groups.pop }
     end
 
   end
