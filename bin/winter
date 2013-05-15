@@ -17,4 +17,3 @@ end
 Winter::CLI.start
 
 cli = Winter::CLI.new
-cli.validate 'spec/sample_data/Winterfile'
