@@ -1,6 +1,20 @@
 
+#repository http://artifactory:8081/artifactory/libs-snapshots-local/com/liveops/api/config/1.0.0-SNAPSHOT/config-1.0.0-20130214.005321-104.pom
+name "Example"
+
+repo "http://artifactory:8081/artifactory/libs-snapshots-local/"
+
 info "print info message"
 
-#bundle 'http://repo1.maven.org/maven2/org/apache/felix/org.apache.felix.bundlerepository/1.6.4/org.apache.felix.bundlerepository-1.6.4.pom'
+#pom 'http://repo1.maven.org/maven2/org/apache/felix/org.apache.felix.bundlerepository/1.6.4/org.apache.felix.bundlerepository-1.6.4.pom'
+pom 'felix.pom'
 
-bundle 'felix.pom'
+group :test do
+  info "winterfile test"
+
+  group :evil do
+    info "winterfile evil"
+  end
+end
+
+

@@ -6,51 +6,77 @@ require 'open-uri'
 require 'pom_fetcher'
 require 'pom_spec'
 
+require 'winter/logger'
+
 module Winter
   class DSL
 
-    def initialize
-      @groups = []
+    def initialize( options={} )
+      @name         = 'default'
+      @groups       = []
+      @repositories = []
+      @options      = options
     end
 
-    def self.evaluate( winterfile )
+    def self.evaluate( winterfile, options={} )
       # Must create instance for instance_eval to have correct scope
-      dsl = new
+      dsl = DSL.new options
       dsl.eval_winterfile winterfile
     end
 
     def eval_winterfile( winterfile, contents=nil )
       contents ||= File.open(winterfile.to_s, "rb"){|f| f.read}
-      instance_eval(contents)
+      # set CWD to where the winterfile is located
+      Dir.chdir (File.split(winterfile.to_s)[0]) do
+        instance_eval(contents)
+      end
     end
 
 # **************************************************************************
 # Winterfile DSL spec
 # **************************************************************************
     
-    def info( msg=nil )
-      puts msg
+    def name( name )
+      @name = name
     end
 
-    def bundle( bundle, *args )
-      if bundle.is_a?(Symbol)
-        raise "Bundles must be URLs, paths to poms, or Strings"
+    def info( msg=nil )
+      $LOG.info msg
+    end
+
+    def bundle( group, artifact, version, *args )
+
+    end
+
+    def pom( pom, *args )
+      if pom.is_a?(Symbol)
+        raise "Poms must be URLs, paths to poms, or Strings"
       end
 
-      pom = MavenGem::PomFetcher.fetch(bundle)
-      pom_spec = MavenGem::PomSpec.parse_pom(pom)
-      #puts pom.to_s
+      pom_file = MavenGem::PomFetcher.fetch(pom)
+      pom_spec = MavenGem::PomSpec.parse_pom(pom_file)
+      #$LOG.info pom.to_s
       pom_spec.dependencies.each do |dep|
-        puts dep
+        $LOG.debug dep
       end
     end
 
     def group(*args, &blk)
       @groups.concat args
-      yield
+      #$LOG.info @options['group'].split(",")
+      #$LOG.info "in group " << @groups.join("::")
+      if( @options['group'] \
+         && @options['group'].split(",").include?(@groups.join("::")) )
+        yield
+      end
     ensure
       args.each { @groups.pop }
     end
+
+    def repository( url )
+      @repositories.push url
+    end
+    alias :repo :repository
 
   end
 end
