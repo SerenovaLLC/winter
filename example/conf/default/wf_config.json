@@ -1,0 +1,12 @@
+{
+  "var_dir" : "~/var/lo/winterfell",
+  "var_service_root" : "~/var/lo/service",
+  "daemontool_root" : "~/service",
+  "config_override_dir" : "#{ENV['home']}/.winterfell/",
+  "64bit" : false,
+  "jvm.mx" : "1g",
+  "web.port" : 8070,
+  "osgi.port" : 6070,
+  "jdb.port" : 6071,
+  "jmx.port" : 6072
+}

@@ -1,5 +1,5 @@
 
-#@wf_dir = File.dirname(File.expand_path File.dirname(__FILE__))
+#@wf_dir = 
 WINTERFELL_DIR = ENV['WINTERFELL_DIR'] || '.'
 #RUN_DIR = File.join(WINTERFELL_DIR,"run") || 'run'
 
