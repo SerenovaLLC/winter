@@ -4,12 +4,12 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'winter/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "winter"
+  spec.name          = "winterfell"
   spec.version       = Winter::VERSION
   spec.authors       = ["S. Mikkel Wilson"]
   spec.email         = ["swilson@liveops.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{Application and configuration bundler for OSGi apps.}
+  spec.summary       = %q{Use Winterfell to describe your OSGi application and its configuration. The command line tool (winter) can be used to assemble, start, stop, and verify the application.}
   spec.homepage      = ""
   spec.license       = "MIT"
 
