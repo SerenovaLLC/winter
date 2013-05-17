@@ -1,12 +1,20 @@
 
+name "Example"
 info "print info message"
 
-#bundle 'http://repo1.maven.org/maven2/org/apache/felix/org.apache.felix.bundlerepository/1.6.4/org.apache.felix.bundlerepository-1.6.4.pom'
+repo "~/.m2/repository"
 
+#pom 'http://repo1.maven.org/maven2/org/apache/felix/org.apache.felix.bundlerepository/1.6.4/org.apache.felix.bundlerepository-1.6.4.pom'
 pom 'felix.pom'
 
-group :test do
-  bundle 'http://repo1.maven.org/maven2/org/apache/felix/org.apache.felix.bundlerepository/1.6.4/org.apache.felix.bundlerepository-1.6.4.pom'
+group :remote do
+  info "This test group requires external internet access"
+
+  repo "http://artifactory:8081/artifactory/libs-releases"
+  repo "http://artifactory:8081/artifactory/libs-snapshots-local/"
+  
+  bundle 'com.liveops.integration', 'data', platform_version
+  bundle 'com.liveops.integration', 'psapirestapi', platform_version, {:package => 'war'}
 end
 
-
+bundle 'org.apache.maven.plugins', 'maven-dependency-plugin', '2.5'

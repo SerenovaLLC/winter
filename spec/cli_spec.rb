@@ -25,12 +25,13 @@ describe Winter do
     end
   end
 
-  describe 'build <manifest>' do
+  describe 'build [manifest]' do
     it "Build a service from a manifest" do
       begin
         lambda {
-          cli = Winter::CLI.new
-          cli.build 'spec/sample_data/Winterfile'
+          args = ["build", "spec/sample_data/Winterfile", "--verbose"]
+          cli = Winter::CLI.start( args )
+          #cli.build 'spec/sample_data/Winterfile' 
         }.should_not raise_error
         # TODO check that files were downloaded to 'run'
       end

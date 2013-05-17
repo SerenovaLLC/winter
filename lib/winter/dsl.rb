@@ -67,9 +67,11 @@ module Winter
         mvn_cmd << " --offline"
       end
 
-      #quiet mode
-      mvn_cmd << " -q"
-      #$LOG.debug mvn_cmd
+      if @options['verbose'] != true
+        #quiet mode
+        mvn_cmd << " -q"
+        #$LOG.debug mvn_cmd
+      end
 
       if @options['getdependencies'] == true
         result = system(mvn_cmd)

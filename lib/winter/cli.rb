@@ -32,6 +32,7 @@ module Winter
 
     desc "build <manifest>", "Build a service from a manifest"
     method_option :group, :desc => "Config group"
+    method_option :verbose, :desc => "Verbose maven output"
     method_option :local, :desc => "Resolve dependencies only from local repository"
     method_option :getdependencies, :desc => "Pull dependencies from all repositories", :default => true
     def build( winterfile='Winterfile' )
