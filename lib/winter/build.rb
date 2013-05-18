@@ -6,7 +6,7 @@ module Winter
 
     def build(winterfile, options)
       #dsl = DSL.new options
-      $LOG.debug (DSL.evaluate winterfile, options)
+      DSL.evaluate winterfile, options
     end
 
   end

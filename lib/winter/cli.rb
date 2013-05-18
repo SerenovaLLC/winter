@@ -16,6 +16,16 @@ module Winter
       DSL.evaluate winterfile, options
     end
 
+    desc "list", "List available services"
+    def list
+      s = Winter::Service.new
+      $LOG.info "Valid services:"
+      s.list.each do |i|
+        $LOG.info " #{i}"
+      end
+      $LOG.info ""
+    end
+
     desc "stop <service>", "Stop the named service"
     def stop(service)
       s = Winter::Service.new

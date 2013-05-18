@@ -51,7 +51,6 @@ module Winter
       # DSL should return a set of configured dependency objects instead of 
       # this hard code bullshit.
       options = Hash === args.last ? args.pop : {}
-      $LOG.debug options
 
       package = options[:package] || 'jar'
       version_name = version=='LATEST'?"":"-#{version}"
@@ -60,6 +59,7 @@ module Winter
 
       mvn_cmd = "mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get" \
       + " -DremoteRepositories=#{@repositories.join(',')}" \
+      + " -Dtransitive=false" \
       + " -Dartifact=#{group}:#{artifact}:#{version}:#{package}" \
       + " -Ddest=#{bundle_file}"
 
@@ -78,7 +78,8 @@ module Winter
         if result == false
           $LOG.error("Failed to retrieve artifact: #{group}:#{artifact}:#{version}:#{package}")
         else
-          $LOG.debug bundle_file
+          #$LOG.debug bundle_file
+          $LOG.debug "#{group}:#{artifact}:#{version}:#{package}"
         end
       end
 
