@@ -4,6 +4,7 @@ require 'winter/build'
 require 'winter/dsl'
 require 'winter/list'
 require 'winter/logger'
+require 'winter/start'
 require 'winter/status'
 require 'winter/stop'
 
@@ -26,8 +27,14 @@ module Winter
       $LOG.info ""
     end
 
-    desc "stop <service>", "Stop the named service"
-    def stop(service)
+    desc "start [service]", "Start the named service"
+    def start( service='Winterfile' )
+      s = Winter::Service.new
+      s.start service, options
+    end
+
+    desc "stop [service]", "Stop the named service"
+    def stop(service='Winterfile')
       s = Winter::Service.new
       s.stop service
     end

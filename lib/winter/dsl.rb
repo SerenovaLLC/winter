@@ -6,7 +6,9 @@ require 'open-uri'
 require 'pom_fetcher'
 require 'pom_spec'
 
+#require 'winter/bundles'
 require 'winter/constants'
+require 'winter/dependency'
 require 'winter/logger'
 require 'winter/templates'
 
@@ -17,6 +19,7 @@ module Winter
       @name         = 'default'
       @groups       = []
       @repositories = []
+      @dependencies = []
       @options      = options
     end
 
@@ -46,16 +49,44 @@ module Winter
       $LOG.info msg
     end
 
+    def lib( *args )
+      options = Hash === args.last ? args.pop : {}
+      libs_dir = File.join(WINTERFELL_DIR,RUN_DIR,@name,'libs')
+      options[:dest]    = libs_dir
+      #Winter::Bundle::getMaven options
+
+    end
+
     def bundle( group, artifact, version='LATEST', *args )
       # TODO refactor this into winter/build.rb
       # DSL should return a set of configured dependency objects instead of 
       # this hard code bullshit.
+      
       options = Hash === args.last ? args.pop : {}
+      dep = Dependency.new
+      dep.artifact      = artifact
+      dep.group         = group
+      dep.version       = version
+      dep.repositories  = @repositories
+      dep.package       = options[:package] || 'jar'
+      dep.offline       = @options['offline'] || @options['offline'] == 'true'
+      dep.transative    = false
 
+      @dependencies.push dep
+      $LOG.debug dep.inspect
+
+      
       package = options[:package] || 'jar'
       version_name = version=='LATEST'?"":"-#{version}"
       bundle_dir = File.join(WINTERFELL_DIR,RUN_DIR,@name,'bundles')
       bundle_file = File.join(bundle_dir,"#{artifact}#{version_name}.#{package}")
+
+      options[:group]    = group
+      options[:artifact] = artifact
+      options[:version]  = version
+      options[:dest]     = bundle_dir
+
+      #Winter::Bundle::getMaven options
 
       mvn_cmd = "mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get" \
       + " -DremoteRepositories=#{@repositories.join(',')}" \

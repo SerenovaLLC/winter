@@ -3,6 +3,8 @@ SimpleCov.start
 
 require 'winter'
 require 'winter/cli'
+require 'winter/status'
+require 'winter/stop'
 
 describe Winter do
   describe "validate" do
@@ -51,9 +53,33 @@ describe Winter do
     end
   end
 
+  describe 'start [service]' do
+    it "Start a service" do
+      begin
+        lambda {
+          args = ["start", "default", "--verbose"]
+          cli = Winter::CLI.start( args )
+          #cli.build 'spec/sample_data/Winterfile' 
+        }.should_not raise_error
+        s = Winter::Service.new
+        if s.status.include?('default')
+          true
+        else
+          false
+        end
+      end
+    end
+  end
+
   # TODO build this out after 'start'
   describe 'stop <service>' do
     it "Stop the named service" do
+      s = Winter::Service.new
+      #Winter::Service.status.each do |name, status|
+        #if status == 'Running'
+          #find the pid file and stop it
+        #end
+      #end
       true
     end
   end
