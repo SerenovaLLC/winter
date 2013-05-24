@@ -6,6 +6,7 @@ repo "http://artifactory:8081/artifactory/libs-snapshots-local/"
 
 #pom 'http://repo1.maven.org/maven2/org/apache/felix/org.apache.felix.bundlerepository/1.6.4/org.apache.felix.bundlerepository-1.6.4.pom'
 #pom 'felix.pom'
+pom 'example.pom'
 
 conf 'conf/default'
 
@@ -24,3 +25,5 @@ bundle 'com.liveops.integration', 'psapirestapi', platform_version, {:package =>
 
 # core deps
 lib 'org.apache.felix', 'org.apache.felix.main', '3.0.6'
+
+read 'conf/default/wf_config.json'

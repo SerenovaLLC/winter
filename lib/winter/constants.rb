@@ -5,6 +5,8 @@ WINTERFELL_DIR = ENV['WINTERFELL_DIR'] || '.'
 
 SERVICES_DIR        = "services"
 RUN_DIR             = "run"
+BUNDLES_DIR         = "bundles"
+LIBS_DIR            = "libs"
 DEFAULT_CONF_DIR    = "defaults"
 TEMPLATES_DIR       = "templates"
 DAEMONTOOLS_DIR     = "/service"

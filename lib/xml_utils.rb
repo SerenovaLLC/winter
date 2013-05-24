@@ -15,17 +15,12 @@ module MavenGem
         deps.elements.each do |dep|
           next if xpath_text(dep, 'optional') == 'true'
 
-          dep_group = xpath_text(dep, 'groupId')
-          dep_artifact = xpath_text(dep, 'artifactId')
-          dep_version = xpath_text(dep, 'version')
-
-          # TODO: Parse maven version number modifiers, i.e: [1.5,)
-          pom_dependencies << if dep_version
-            Gem::Dependency.new(maven_to_gem_name(dep_group, dep_artifact),
-              "=#{maven_to_gem_version(dep_version)}")
-          else
-            Gem::Dependency.new(maven_to_gem_name(dep_group, dep_artifact))
-          end
+          pom_dependencies << {
+            :group     => xpath_text(dep, 'groupId'),
+            :artifact  => xpath_text(dep, 'artifactId'),
+            :version   => xpath_text(dep, 'version'),
+            :scope     => xpath_text(dep, 'scope')
+          }
         end
       end
 

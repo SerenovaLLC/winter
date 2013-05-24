@@ -6,8 +6,8 @@ module Winter
 
     # stop winterfell service
     def stop(service)
-      #f_pid = File.join(@wf_dir,RUN_DIR,service, "pid")
-      f_pid = File.join('.',RUN_DIR,service, "pid")
+      f_pid = File.join(WINTERFELL_DIR,RUN_DIR,service, "pid")
+      #service_dir = File.join(File.split(winterfile)[0],RUN_DIR,@config['service'])
       if File.exists?(f_pid)
         pid_file = File.open(f_pid, "r")
         pid = pid_file.read().to_i

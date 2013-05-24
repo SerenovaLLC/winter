@@ -28,7 +28,7 @@ module Winter
     end
 
     desc "start [service]", "Start the named service"
-    def start( service='Winterfile' )
+    def start(service='Winterfile')
       s = Winter::Service.new
       s.start service, options
     end

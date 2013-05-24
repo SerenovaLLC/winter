@@ -1,6 +1,7 @@
 # This is the Domain Specific Language definition for the Winterfile
 
 require 'open-uri'
+require 'json'
 #require 'maven_gem'
 
 require 'pom_fetcher'
@@ -9,6 +10,7 @@ require 'pom_spec'
 #require 'winter/bundles'
 require 'winter/constants'
 require 'winter/dependency'
+#require 'winter/json_util'
 require 'winter/logger'
 require 'winter/templates'
 
@@ -21,6 +23,7 @@ module Winter
       @repositories = []
       @dependencies = []
       @options      = options
+      @config       = {}
     end
 
     def self.evaluate( winterfile, options={} )
@@ -35,6 +38,10 @@ module Winter
       Dir.chdir (File.split(winterfile.to_s)[0]) do
         instance_eval(contents)
       end
+      {
+        :config       => @config,
+        :dependencies => @dependencies
+      }
     end
 
 # **************************************************************************
@@ -43,25 +50,14 @@ module Winter
     
     def name( name )
       @name = name
+      @config['service'] = name
     end
 
     def info( msg=nil )
       $LOG.info msg
     end
 
-    def lib( *args )
-      options = Hash === args.last ? args.pop : {}
-      libs_dir = File.join(WINTERFELL_DIR,RUN_DIR,@name,'libs')
-      options[:dest]    = libs_dir
-      #Winter::Bundle::getMaven options
-
-    end
-
-    def bundle( group, artifact, version='LATEST', *args )
-      # TODO refactor this into winter/build.rb
-      # DSL should return a set of configured dependency objects instead of 
-      # this hard code bullshit.
-      
+    def lib( group, artifact, version='LATEST', *args )
       options = Hash === args.last ? args.pop : {}
       dep = Dependency.new
       dep.artifact      = artifact
@@ -71,54 +67,27 @@ module Winter
       dep.package       = options[:package] || 'jar'
       dep.offline       = @options['offline'] || @options['offline'] == 'true'
       dep.transative    = false
+      dep.destination   = File.join(WINTERFELL_DIR,RUN_DIR,@name,LIBS_DIR)
+      #dep.verbose       = true
 
       @dependencies.push dep
-      $LOG.debug dep.inspect
-
-      
-      package = options[:package] || 'jar'
-      version_name = version=='LATEST'?"":"-#{version}"
-      bundle_dir = File.join(WINTERFELL_DIR,RUN_DIR,@name,'bundles')
-      bundle_file = File.join(bundle_dir,"#{artifact}#{version_name}.#{package}")
-
-      options[:group]    = group
-      options[:artifact] = artifact
-      options[:version]  = version
-      options[:dest]     = bundle_dir
-
-      #Winter::Bundle::getMaven options
-
-      mvn_cmd = "mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get" \
-      + " -DremoteRepositories=#{@repositories.join(',')}" \
-      + " -Dtransitive=false" \
-      + " -Dartifact=#{group}:#{artifact}:#{version}:#{package}" \
-      + " -Ddest=#{bundle_file}"
-
-      if @options['offline']
-        mvn_cmd << " --offline"
-      end
-
-      if @options['verbose'] != true
-        #quiet mode
-        mvn_cmd << " -q"
-        #$LOG.debug mvn_cmd
-      end
-
-      if @options['getdependencies'] == true
-        result = system(mvn_cmd)
-        if result == false
-          $LOG.error("Failed to retrieve artifact: #{group}:#{artifact}:#{version}:#{package}")
-        else
-          #$LOG.debug bundle_file
-          $LOG.debug "#{group}:#{artifact}:#{version}:#{package}"
-        end
-      end
-
     end
 
-    def conf( dir )
-      #$LOG.debug( dir << " " << File.join(WINTERFELL_DIR,RUN_DIR,'conf') )
-      process_templates( dir, File.join(WINTERFELL_DIR,RUN_DIR,@name,'conf') )
+    def bundle( group, artifact, version='LATEST', *args )
+      options = Hash === args.last ? args.pop : {}
+      dep = Dependency.new
+      dep.artifact      = artifact
+      dep.group         = group
+      dep.version       = version
+      dep.repositories  = @repositories
+      dep.package       = options[:package] || 'jar'
+      dep.offline       = @options['offline'] || @options['offline'] == 'true'
+      dep.transative    = false
+      dep.destination   = File.join(WINTERFELL_DIR,RUN_DIR,@name,BUNDLES_DIR)
+      #dep.verbose       = true
+
+      @dependencies.push dep
+      #$LOG.debug dep.inspect
     end
 
     def pom( pom, *args )
@@ -128,9 +97,25 @@ module Winter
 
       pom_file = MavenGem::PomFetcher.fetch(pom)
       pom_spec = MavenGem::PomSpec.parse_pom(pom_file)
-      #$LOG.info pom.to_s
+      #$LOG.info pom_spec.dependencies
       pom_spec.dependencies.each do |dep|
         #$LOG.debug dep
+        if dep[:scope] == 'provided'
+          lib( dep[:group], dep[:artifact], dep[:version] ) 
+        end
+      end
+    end
+
+    def conf( dir )
+      #$LOG.debug( dir << " " << File.join(WINTERFELL_DIR,RUN_DIR,'conf') )
+      process_templates( dir, File.join(WINTERFELL_DIR,RUN_DIR,@name,'conf') )
+    end
+
+    def read( file )
+      if File.exist?(file)
+        @config.merge!( JSON.parse(File.read file ))
+      else
+        $LOG.warn "#{file} could not be found."
       end
     end
 

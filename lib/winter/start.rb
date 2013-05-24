@@ -5,18 +5,44 @@ module Winter
   class Service
 
     def initialize
+      #put defaults here
       @config = {}
       @config['java_home'] = ENV['JAVA_HOME'] 
-      @config['service'] = 'Example'
+      @config['service'] = 'default'
       @config['log.level'] = 1
       @config['web.port'] = 8080
       @config['osgi.port'] = 6070
+      #@config['log.dir'] = File.join(WINTERFELL_DIR,RUN_DIR,@config['service'],'logs')
     end
 
     def start(winterfile, options)
-      DSL.evaluate winterfile, options
+      tmp = DSL.evaluate winterfile, options
+      tmp[:dependencies].each do |dep|
+        $LOG.debug "#{dep.group}.#{dep.artifact}"
+      end
 
-      $LOG.debug generate_java_invocation(@config,@config['service'])
+      @config.merge! tmp[:config]
+      $LOG.debug @config
+
+      service_dir = File.join(File.split(winterfile)[0],RUN_DIR,@config['service'])
+
+      java_cmd = generate_java_invocation(@config,@config['service'])
+      #java_cmd << " > #{@config['console.log']} 2>&1"
+      $LOG.debug java_cmd
+
+      # execute
+      if( File.exists?(File.join(service_dir, "pid")) )
+        $LOG.error "PID file already exists. Is the process running?"
+        exit
+      end
+      pid_file = File.open(File.join(service_dir, "pid"), "w")
+      pid = fork do
+        exec(java_cmd)
+      end
+      pid_file.write(pid)
+      pid_file.close      
+
+      $LOG.info "Started #{@config['service']} (#{pid})"
     end
 
     def generate_java_invocation(config,service)
@@ -28,7 +54,7 @@ module Winter
       #cmd.push(config["64bit"]==true ? add_64bit_flag():'')
       #cmd.push(" -XX:MaxPermSize=256m -XX:NewRatio=3")
       #cmd.push(add_memory_options())
-      cmd.push(add_config_option("felix.fileinstall.dir", "#{WINTERFELL_DIR}/#{RUN_DIR}/#{config['service']}/felix_deploy"))
+      cmd.push(add_config_option("felix.fileinstall.dir", "#{WINTERFELL_DIR}/#{RUN_DIR}/#{config['service']}/#{BUNDLES_DIR}"))
 
       config_properties = File.join(WINTERFELL_DIR, RUN_DIR, @config['service'], "conf", F_CONFIG_PROPERTIES)
       cmd.push(add_config_option("felix.config.properties", "file:" + config_properties))
@@ -37,7 +63,7 @@ module Winter
       # determine system.properties file existence
       #system_properties = find_system_properties
       #
-      system_properties = File.join(WINTERFELL_DIR, SERVICES_DIR, @config['service'], F_SYSTEM_PROPERTIES)
+      system_properties = File.join(WINTERFELL_DIR, RUN_DIR, @config['service'], F_SYSTEM_PROPERTIES)
       cmd.push(add_config_option("felix.system.properties", "file:#{system_properties}"))
 
       # dertmine logger_bundle.properties location
