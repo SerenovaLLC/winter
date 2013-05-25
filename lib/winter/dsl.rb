@@ -66,7 +66,7 @@ module Winter
       dep.repositories  = @repositories
       dep.package       = options[:package] || 'jar'
       dep.offline       = @options['offline'] || @options['offline'] == 'true'
-      dep.transative    = false
+      dep.transative    = true
       dep.destination   = File.join(WINTERFELL_DIR,RUN_DIR,@name,LIBS_DIR)
       #dep.verbose       = true
 

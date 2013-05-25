@@ -1,0 +1,31 @@
+
+
+## Log4j Properties ##
+
+
+# Set root logger level to DEBUG and its only appender to A1.
+log4j.rootLogger=DEBUG, console, file
+
+
+log4j.appender.console=org.apache.log4j.ConsoleAppender
+log4j.appender.console.threshold=debug
+log4j.appender.console.layout=org.apache.log4j.PatternLayout
+log4j.appender.console.layout.ConversionPattern=%d [%t] %-5p %c %x - %m%n
+
+log4j.appender.file=org.apache.log4j.RollingFileAppender
+log4j.appender.file.maxFileSize=200MB
+log4j.appender.file.maxBackupIndex=10
+log4j.appender.file.File=${log.dir}/winterfell.log
+log4j.appender.file.threshold=debug
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d [%t] %-5p %c %x - %m%n
+
+log4j.appender.errorfile=org.apache.log4j.RollingFileAppender
+log4j.appender.errorfile.maxFileSize=10MB
+log4j.appender.errorfile.maxBackupIndex=5
+log4j.appender.errorfile.File=${log.dir}/winterfell_error.log
+log4j.appender.errorfile.threshold=error
+log4j.appender.errorfile.layout=org.apache.log4j.PatternLayout
+log4j.appender.errorfile.layout.ConversionPattern=%d [%t] %-5p %c %x - %m%n
+
+

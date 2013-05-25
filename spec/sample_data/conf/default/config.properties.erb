@@ -1,0 +1,51 @@
+# The following property determines which actions are performed when
+# processing the auto-deploy directory. It is a comma-delimited list of
+# the following values: 'install', 'start', 'update', and 'uninstall'.
+# An undefined or blank value is equivalent to disabling auto-deploy
+# processing.
+felix.auto.deploy.action=install,start
+
+# The following property specifies the directory to use as the bundle
+# auto-deploy directory; the default is 'bundle' in the working directory.
+#felix.auto.deploy.dir=bundle
+
+# The following property is a space-delimited list of bundle URLs
+# to install when the framework starts. The ending numerical component
+# is the target start level. Any number of these properties may be
+# specified for different start levels.
+#felix.auto.install.1=
+
+# The following property is a space-delimited list of bundle URLs
+# to install and start when the framework starts. The ending numerical
+# component is the target start level. Any number of these properties
+# may be specified for different start levels.
+#felix.auto.start.1=
+
+#log.level : 1-ERROR, 2-WARN, 3-INFO, 4-DEBUG
+felix.log.level=1
+org.osgi.framework.startlevel.beginning=100
+
+# Sets the initial start level of the framework upon startup.
+#org.osgi.framework.startlevel.beginning=1
+
+# Sets the start level of newly installed bundles.
+#felix.startlevel.bundle=1
+
+# Felix installs a stream and content handler factories by default,
+# uncomment the following line to not install them.
+#felix.service.urlhandlers=false
+
+# The launcher registers a shutdown hook to cleanly stop the framework
+# by default, uncomment the following line to disable it.
+#felix.shutdown.hook=false
+
+#
+# Bundle config properties.
+#
+
+org.osgi.service.http.port=${web.port}
+org.osgi.framework.storage.clean=onFirstInit
+osgi.shell.telnet.port=${osgi.port}
+osgi.shell.telnet.maxconn=2
+org.apache.felix.http.jettyEnabled=true
+obr.repository.url=http://felix.apache.org/obr/releases.xml

@@ -8,7 +8,7 @@ module Winter
       #dsl = DSL.new options
       tmp = DSL.evaluate winterfile, options
       dependencies = tmp[:dependencies]
-      $LOG.debug dependencies
+      #$LOG.debug dependencies
 
       dependencies.each do |dep|
         dep.getMaven

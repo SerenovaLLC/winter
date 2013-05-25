@@ -28,6 +28,8 @@ module Winter
     end
 
     desc "start [service]", "Start the named service"
+    method_option :group,   :desc => "Config group"
+    method_option :verbose, :desc => "Verbose maven output"
     def start(service='Winterfile')
       s = Winter::Service.new
       s.start service, options
@@ -48,9 +50,9 @@ module Winter
     end
 
     desc "build <manifest>", "Build a service from a manifest"
-    method_option :group, :desc => "Config group"
+    method_option :group,   :desc => "Config group"
     method_option :verbose, :desc => "Verbose maven output"
-    method_option :local, :desc => "Resolve dependencies only from local repository"
+    method_option :local,   :desc => "Resolve dependencies only from local repository"
     method_option :getdependencies, :desc => "Pull dependencies from all repositories", :default => true
     def build( winterfile='Winterfile' )
       s = Winter::Service.new

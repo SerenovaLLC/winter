@@ -1,0 +1,8 @@
+{
+  "64bit" : false,
+  "jvm.mx" : "1g",
+  "web.port" : 8070,
+  "osgi.port" : 6070,
+  "jdb.port" : 6071,
+  "jmx.port" : 6072
+}

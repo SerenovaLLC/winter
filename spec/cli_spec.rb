@@ -7,6 +7,15 @@ require 'winter/status'
 require 'winter/stop'
 
 describe Winter do
+
+  describe "Unknown CLI command" do
+    it "Doesn't explode" do
+      #resp = `bundle exec winter badcommand`
+      #puts "*** #{resp}"
+      #resp.should == 'Could not find command "badcommand".'
+    end
+  end
+
   describe "validate" do
     it "Reads a local pom file" do
       begin
@@ -46,8 +55,8 @@ describe Winter do
         lambda {
           args = ["build", "spec/sample_data/Winterfile", "--verbose"]
           cli = Winter::CLI.start( args )
-          #cli.build 'spec/sample_data/Winterfile' 
         }.should_not raise_error
+        Dir["run/Example/libs"].include? "maven-dependency-plugin-2.5.jar"
         # TODO check that files were downloaded to 'run'
       end
     end

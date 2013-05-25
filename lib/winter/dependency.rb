@@ -43,6 +43,7 @@ module Winter
         #$LOG.debug mvn_cmd
       end
 
+
       result = system(mvn_cmd)
       if result == false
         $LOG.error("Failed to retrieve artifact: #{@group}:#{@artifact}:#{@version}:#{@package}")
