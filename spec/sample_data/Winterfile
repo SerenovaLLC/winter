@@ -1,5 +1,5 @@
 
-name "Example"
+name "default"
 
 repo "http://artifactory:8081/artifactory/libs-releases"
 repo "http://artifactory:8081/artifactory/libs-snapshots-local/"
@@ -24,3 +24,4 @@ lib 'org.apache.maven.plugins', 'maven-dependency-plugin', plugin_version
 
 # core deps
 lib 'org.apache.felix', 'org.apache.felix.main', '3.0.6'
+bundle 'org.apache.felix', 'org.apache.felix.fileinstall', '3.2.6'

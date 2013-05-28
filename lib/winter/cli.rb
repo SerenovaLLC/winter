@@ -7,6 +7,7 @@ require 'winter/logger'
 require 'winter/start'
 require 'winter/status'
 require 'winter/stop'
+require 'winter/validate'
 
 module Winter
   class CLI < Thor
@@ -14,17 +15,23 @@ module Winter
     desc "validate <Winterfile>", "(optional) Check the configuration files"
     method_option :group, :desc => "Config group"
     def validate( winterfile='Winterfile' )
-      DSL.evaluate winterfile, options
+      s = Winter::Service.new
+      s.validate winterfile, options
     end
 
     desc "list", "List available services"
     def list
-      s = Winter::Service.new
-      $LOG.info "Valid services:"
-      s.list.each do |i|
-        $LOG.info " #{i}"
+      begin
+        s = Winter::Service.new
+        s.list 
+        $LOG.info "Valid services:"
+        s.list.each do |i|
+          $LOG.info " #{i}"
+        end
+        $LOG.info ""
+      rescue
+        $LOG.error $!
       end
-      $LOG.info ""
     end
 
     desc "start [service]", "Start the named service"
@@ -49,7 +56,7 @@ module Winter
       end
     end
 
-    desc "build <manifest>", "Build a service from a manifest"
+    desc "build <manifest>", "Build a service from a manifest (optional)"
     method_option :group,   :desc => "Config group"
     method_option :verbose, :desc => "Verbose maven output"
     method_option :local,   :desc => "Resolve dependencies only from local repository"

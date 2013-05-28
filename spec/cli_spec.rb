@@ -56,7 +56,7 @@ describe Winter do
           args = ["build", "spec/sample_data/Winterfile", "--verbose"]
           cli = Winter::CLI.start( args )
         }.should_not raise_error
-        Dir["run/Example/libs"].include? "maven-dependency-plugin-2.5.jar"
+        Dir["run/default/libs"].include? "maven-dependency-plugin-2.5.jar"
         # TODO check that files were downloaded to 'run'
       end
     end

@@ -29,11 +29,12 @@ module Winter
     def self.evaluate( winterfile, options={} )
       # Must create instance for instance_eval to have correct scope
       dsl = DSL.new options
-      dsl.eval_winterfile winterfile
+      validate(dsl.eval_winterfile winterfile)
     end
 
     def eval_winterfile( winterfile, contents=nil )
       contents ||= File.open(winterfile.to_s, "rb"){|f| f.read}
+      #set_const("WINTERFELL_DIR", File.split(winterfile)[0]) # TODO fix constants hack
       # set CWD to where the winterfile is located
       Dir.chdir (File.split(winterfile.to_s)[0]) do
         instance_eval(contents)
@@ -44,13 +45,17 @@ module Winter
       }
     end
 
+    def self.validate( res )
+      raise "Must have at least one service name." if res[:config]['service'].nil?
+      res
+    end
+
 # **************************************************************************
 # Winterfile DSL spec
 # **************************************************************************
     
     def name( name )
-      @name = name
-      @config['service'] = name
+      @name = @config['service'] = name
     end
 
     def info( msg=nil )
@@ -67,7 +72,7 @@ module Winter
       dep.package       = options[:package] || 'jar'
       dep.offline       = @options['offline'] || @options['offline'] == 'true'
       dep.transative    = true
-      dep.destination   = File.join(WINTERFELL_DIR,RUN_DIR,@name,LIBS_DIR)
+      dep.destination   = File.join(Dir.getwd,RUN_DIR,@name,LIBS_DIR)
       #dep.verbose       = true
 
       @dependencies.push dep
@@ -83,11 +88,10 @@ module Winter
       dep.package       = options[:package] || 'jar'
       dep.offline       = @options['offline'] || @options['offline'] == 'true'
       dep.transative    = false
-      dep.destination   = File.join(WINTERFELL_DIR,RUN_DIR,@name,BUNDLES_DIR)
+      dep.destination   = File.join(Dir.getwd,RUN_DIR,@name,BUNDLES_DIR)
       #dep.verbose       = true
 
       @dependencies.push dep
-      #$LOG.debug dep.inspect
     end
 
     def pom( pom, *args )
