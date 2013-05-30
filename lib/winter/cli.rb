@@ -1,13 +1,13 @@
 require 'thor'
 #autoload :DSL,      'winter/dsl'
-require 'winter/build'
 require 'winter/dsl'
-require 'winter/list'
 require 'winter/logger'
-require 'winter/start'
-require 'winter/status'
-require 'winter/stop'
-require 'winter/validate'
+require 'winter/service/build'
+require 'winter/service/list'
+require 'winter/service/start'
+require 'winter/service/status'
+require 'winter/service/stop'
+require 'winter/service/validate'
 
 module Winter
   class CLI < Thor

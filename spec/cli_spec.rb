@@ -3,8 +3,6 @@ SimpleCov.start
 
 require 'winter'
 require 'winter/cli'
-require 'winter/status'
-require 'winter/stop'
 
 describe Winter do
 
