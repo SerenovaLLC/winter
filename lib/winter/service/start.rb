@@ -7,11 +7,17 @@ module Winter
     def initialize
       #put defaults here
       @config = {}
-      @config['java_home'] = ENV['JAVA_HOME'] 
-      @config['service'] = 'default'
-      @config['log.level'] = 1
-      @config['web.port'] = 8080
-      @config['osgi.port'] = 6070
+      @config['java_home']   = ENV['JAVA_HOME'] 
+      @config['service']     = 'default'
+      @config['log.level']   = 1
+      @config['64bit']       = true
+      @config['jvm.mx']      = '1g'
+      @config['console.log'] = '/dev/null'
+      @config['web.port']    = 8080
+      @config['osgi.port']   = 6070
+      @config['jdb.port']    = 6071
+      @config['jmx.port']    = 6072
+
       #@config['log.dir'] = File.join(WINTERFELL_DIR,RUN_DIR,@config['service'],'logs')
     end
 
@@ -23,19 +29,20 @@ module Winter
 
       @config.merge! tmp[:config]
       $LOG.debug @config
+      @service_dir = File.join(File.split(winterfile)[0],RUN_DIR,@config['service'])
+      @config['log.dir'] = File.join(@service_dir,'logs')
 
-      service_dir = File.join(File.split(winterfile)[0],RUN_DIR,@config['service'])
 
-      java_cmd = generate_java_invocation(@config,@config['service'])
-      #java_cmd << " > #{@config['console.log']} 2>&1"
+      java_cmd = generate_java_invocation
+      java_cmd << " > #{@config['console.log']} 2>&1"
       $LOG.debug java_cmd
 
       # execute
-      if( File.exists?(File.join(service_dir, "pid")) )
+      if( File.exists?(File.join(@service_dir, "pid")) )
         $LOG.error "PID file already exists. Is the process running?"
         exit
       end
-      pid_file = File.open(File.join(service_dir, "pid"), "w")
+      pid_file = File.open(File.join(@service_dir, "pid"), "w")
       pid = fork do
         exec(java_cmd)
       end
@@ -45,67 +52,83 @@ module Winter
       $LOG.info "Started #{@config['service']} (#{pid})"
     end
 
-    def generate_java_invocation(config,service)
-      java_bin = "#{config['java_home']}/bin/"
-      java_bin = ""
+    def find_java
+      if !@config['java_home'].nil? && File.exists?(File.join(@config['java_home'],'bin','java'))
+        return File.join(@config['java_home'],'bin','java')
+      end
+      if !ENV['JAVA_HOME'].nil? && File.exists?(File.join(ENV['JAVA_HOME'],'bin','java'))
+        return File.join(ENV['JAVA_HOME'],'bin','java')
+      end
+      env = `env java -version 2>&1`
+      if env['version']
+        return "java"
+      end
+      raise "JRE could not be found. Please set JAVA_HOME or configure java_home."
+    end
+
+    def generate_java_invocation
+      java_bin = "#{@config['java_home']}/bin/"
+      java_bin = find_java
 
       # start building the command
-      cmd = [ "#{java_bin}java -server" ]
-      #cmd.push(config["64bit"]==true ? add_64bit_flag():'')
-      #cmd.push(" -XX:MaxPermSize=256m -XX:NewRatio=3")
-      #cmd.push(add_memory_options())
-      cmd.push(add_config_option("felix.fileinstall.dir", "#{WINTERFELL_DIR}/#{RUN_DIR}/#{config['service']}/#{BUNDLES_DIR}"))
+      cmd = [ "#{java_bin} -server" ]
+      cmd << (@config["64bit"]==true ? " -d64 -XX:+UseCompressedOops":'')
+      cmd << " -XX:MaxPermSize=256m -XX:NewRatio=3"
+      cmd << " -Xmx#{@config['jvm.mx']}" 
+      cmd << opt("felix.fileinstall.dir", "#{@service_dir}/#{BUNDLES_DIR}")
 
-      config_properties = File.join(WINTERFELL_DIR, RUN_DIR, @config['service'], "conf", F_CONFIG_PROPERTIES)
-      cmd.push(add_config_option("felix.config.properties", "file:" + config_properties))
-      #cmd.push(add_config_option("felix.log.level", felix_log_level(@config['log.level'])))
+      config_properties = File.join(@service_dir, "conf", F_CONFIG_PROPERTIES)
+      cmd << opt("felix.config.properties", "file:" + config_properties)
+      cmd << opt("felix.log.level", felix_log_level(@config['log.level']))
 
-      # determine system.properties file existence
-      #system_properties = find_system_properties
-      #
-      system_properties = File.join(WINTERFELL_DIR, RUN_DIR, @config['service'], F_SYSTEM_PROPERTIES)
-      cmd.push(add_config_option("felix.system.properties", "file:#{system_properties}"))
+      system_properties = File.join(@service_dir, F_SYSTEM_PROPERTIES)
+      cmd << opt("felix.system.properties", "file:#{system_properties}")
 
-      # dertmine logger_bundle.properties location
-      #logger_properties = find_logger_properties
-      logger_properties = File.join(WINTERFELL_DIR, RUN_DIR, @config['service'], "conf", F_LOGGER_PROPERTIES)
+      logger_properties = File.join(@service_dir, "conf", F_LOGGER_PROPERTIES)
       # TODO remove this option when the logger bundle is updated to use the classpath
-      cmd.push(add_config_option("log4j.configuration", logger_properties))
+      cmd << opt("log4j.configuration", logger_properties)
     
-      cmd.push(add_config_option("web.port",         config["web.port"]))
-      cmd.push(add_config_option("osgi.port",        config["osgi.port"]))
-      cmd.push(add_config_option("log.dir",          config['log.dir']))
-      cmd.push(add_config_option("service.conf.dir", config['service.conf.dir']))
-      cmd.push(add_config_option(OPT_BUNDLE_DIR, 
-        "#{WINTERFELL_DIR}/#{RUN_DIR}/#{config['service']}/bundles"))
-      cmd.push(config["osgi.shell.telnet.ip"]?add_osgi_ip(config["osgi.shell.telnet.ip"]):'')
+      cmd << opt("web.port",         @config["web.port"])
+      cmd << opt("osgi.port",        @config["osgi.port"])
+      cmd << opt("log.dir",          @config['log.dir'])
+      cmd << opt("service.conf.dir", @config['service.conf.dir'])
+      cmd << opt(OPT_BUNDLE_DIR,     "#{@service_dir}/bundles")
+      cmd << @config["osgi.shell.telnet.ip"]?" -Dosgi.shell.telnet.ip=#{@config["osgi.shell.telnet.ip"]}":''
       #cmd.push(add_code_coverage())
-      #cmd.push(config["jdb.port"]?add_jdb_option(config["jdb.port"]):'')
-      #cmd.push(config["jmx.port"]?add_jmx_option(config["jmx.port"]):'')
-      cmd.push(add_jar())
-      cmd.push(add_bundle())
-      cmd.push(add_cache())
+      cmd << (@config["jdb.port"] ? " -Xdebug -Xrunjdwp:transport=dt_socket,address=#{@config["jdb.port"]},server=y,suspend=n" : '')
+      cmd << (@config["jmx.port"] ? " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=#{@config["jmx.port"]} -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false" : '')
+      cmd << " -cp #{@service_dir}/conf:#{@service_dir}/libs/org.apache.felix.main-3.0.6.jar org.apache.felix.main.Main" #TODO ADD 'felix' directive to DSL
+      cmd << " -b #{@service_dir}/libs"
+      cmd << " #{@service_dir}/felix_cache"
         
       return cmd.join(" \\\n ")
       #return cmd.join(" ")
     end 
 
-    def add_jar()
-      return " -cp #{WINTERFELL_DIR}/run/#{@config['service']}/conf:#{WINTERFELL_DIR}/run/#{@config['service']}/libs/org.apache.felix.main-3.0.6.jar org.apache.felix.main.Main"
-    end
-
-    def add_bundle()
-      #return " -b #{WINTERFELL_DIR}/felix/bundle"
-      return " -b #{WINTERFELL_DIR}/#{RUN_DIR}/#{@config['service']}/libs"
-    end
-
-    def add_cache()
-      return " #{WINTERFELL_DIR}/#{RUN_DIR}/#{@config['service']}/felix_cache"
-    end
-
-    def add_config_option(key, value)
+    def opt(key, value)
       return " -D#{key}=#{value}"
     end
+
+    def felix_log_level(level)
+      if level =~ /[1-4]/
+        return level
+      end
+      if !level.is_a? String
+        return 1
+      end
+      case level.upcase
+      when "ERROR"
+        return 1
+      when "WARN"
+        return 2
+      when "INFO"
+        return 3
+      when "DEBUG"
+        return 4
+      else
+        return 1
+      end
+  end
 
   end
 end

@@ -5,9 +5,14 @@ module Winter
   class Service
 
     # stop winterfell service
-    def stop(service)
-      f_pid = File.join(WINTERFELL_DIR,RUN_DIR,service, "pid")
-      #service_dir = File.join(File.split(winterfile)[0],RUN_DIR,@config['service'])
+    def stop(winterfile='Winterfile', options={})
+      tmp = DSL.evaluate winterfile, options
+      config = tmp[:config]
+      service = config['service']
+
+      @service_dir = File.join(File.split(winterfile)[0],RUN_DIR,service)
+      f_pid = File.join(@service_dir, "pid")
+
       if File.exists?(f_pid)
         pid_file = File.open(f_pid, "r")
         pid = pid_file.read().to_i

@@ -2,8 +2,8 @@ require 'thor'
 #autoload :DSL,      'winter/dsl'
 require 'winter/dsl'
 require 'winter/logger'
+require 'winter/version'
 require 'winter/service/build'
-require 'winter/service/list'
 require 'winter/service/start'
 require 'winter/service/status'
 require 'winter/service/stop'
@@ -19,33 +19,24 @@ module Winter
       s.validate winterfile, options
     end
 
-    desc "list", "List available services"
-    def list
-      begin
-        s = Winter::Service.new
-        s.list 
-        $LOG.info "Valid services:"
-        s.list.each do |i|
-          $LOG.info " #{i}"
-        end
-        $LOG.info ""
-      rescue
-        $LOG.error $!
-      end
+    desc "version", "Display version information."
+    def version
+      $LOG.info VERSION
     end
 
-    desc "start [service]", "Start the named service"
+    desc "start [winterfile]", "Start the services in [winterfile] "
     method_option :group,   :desc => "Config group"
     method_option :verbose, :desc => "Verbose maven output"
-    def start(service='Winterfile')
+    def start(winterfile='Winterfile')
       s = Winter::Service.new
-      s.start service, options
+      s.start winterfile, options
     end
 
-    desc "stop [service]", "Stop the named service"
-    def stop(service='Winterfile')
+    desc "stop [winterfile]", "Stop the services in [winterfile]"
+    method_option :group,   :desc => "Config group"
+    def stop(winterfile='Winterfile')
       s = Winter::Service.new
-      s.stop service
+      s.stop winterfile, options
     end
 
     desc "status", "Show status of available services"
@@ -56,7 +47,7 @@ module Winter
       end
     end
 
-    desc "build <manifest>", "Build a service from a manifest (optional)"
+    desc "build <Winterfile>", "Build a service from a Winterfile (optional)"
     method_option :group,   :desc => "Config group"
     method_option :verbose, :desc => "Verbose maven output"
     method_option :local,   :desc => "Resolve dependencies only from local repository"
