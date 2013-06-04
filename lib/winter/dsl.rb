@@ -24,6 +24,7 @@ module Winter
       @dependencies = []
       @options      = options
       @config       = {}
+      @felix        = lib('org.apache.felix', 'org.apache.felix.main', '3.0.6')
     end
 
     def self.evaluate( winterfile, options={} )
@@ -34,14 +35,16 @@ module Winter
 
     def eval_winterfile( winterfile, contents=nil )
       contents ||= File.open(winterfile.to_s, "rb"){|f| f.read}
-      #set_const("WINTERFELL_DIR", File.split(winterfile)[0]) # TODO fix constants hack
+      
       # set CWD to where the winterfile is located
       Dir.chdir (File.split(winterfile.to_s)[0]) do
         instance_eval(contents)
       end
       {
         :config       => @config,
-        :dependencies => @dependencies
+        :dependencies => @dependencies,
+        :felix        => @felix,
+        :directives   => []
       }
     end
 
@@ -76,6 +79,7 @@ module Winter
       #dep.verbose       = true
 
       @dependencies.push dep
+      dep
     end
 
     def bundle( group, artifact, version='LATEST', *args )
@@ -92,6 +96,11 @@ module Winter
       #dep.verbose       = true
 
       @dependencies.push dep
+      dep
+    end
+
+    def felix( group, artifact, version='LATEST', *args )
+      @felix = lib( group, artifact, version, args )
     end
 
     def pom( pom, *args )

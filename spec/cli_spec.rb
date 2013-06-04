@@ -50,34 +50,32 @@ describe Winter do
   end
 
   describe 'start and stop a service : ' do
-    it "Start a service" do
-      begin
-        lambda {
-          args = ["start", "spec/sample_data/Winterfile"]
-          cli = Winter::CLI.start( args )
-        }.should_not raise_error
+    context "start " do
+      it "Start a service" do
+        begin
+          lambda {
+            args = ["start", "spec/sample_data/Winterfile"]
+            cli = Winter::CLI.start( args )
+          }.should_not raise_error
+        end
       end
-    end
 
-    it "View that the service is running" do
-      begin
-        lambda {
-          cli = Winter::CLI.new
-          cli.status
-        }.should_not raise_error
+      it "View that the service is running" do
+        begin
+          lambda {
+            cli = Winter::CLI.new
+            cli.status
+          }.should_not raise_error
+        end
       end
-    end
 
-    it "Stop the service in [winterfile]" do
-      lambda {
-        args = ["stop", "spec/sample_data/Winterfile"]
-        cli = Winter::CLI.start( args )
-      }.should_not raise_error
+      #it "Stop the service in [winterfile]" do
+      #  lambda {
+      #    args = ["stop", "spec/sample_data/Winterfile"]
+      #    cli = Winter::CLI.start( args )
+      #  }.should_not raise_error
+      #end
     end
   end
-
-  # TODO build this out after 'start'
-  #describe 'stop' do
-  #end
 
 end

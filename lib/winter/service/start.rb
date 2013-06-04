@@ -26,6 +26,7 @@ module Winter
       tmp[:dependencies].each do |dep|
         $LOG.debug "#{dep.group}.#{dep.artifact}"
       end
+      @felix = tmp[:felix]
 
       @config.merge! tmp[:config]
       $LOG.debug @config
@@ -70,6 +71,9 @@ module Winter
       java_bin = "#{@config['java_home']}/bin/"
       java_bin = find_java
 
+      $LOG.debug @felix
+      felix_jar = File.join(@felix.destination,"#{@felix.artifact}-#{@felix.version}.#{@felix.package}")
+
       # start building the command
       cmd = [ "#{java_bin} -server" ]
       cmd << (@config["64bit"]==true ? " -d64 -XX:+UseCompressedOops":'')
@@ -97,7 +101,7 @@ module Winter
       #cmd.push(add_code_coverage())
       cmd << (@config["jdb.port"] ? " -Xdebug -Xrunjdwp:transport=dt_socket,address=#{@config["jdb.port"]},server=y,suspend=n" : '')
       cmd << (@config["jmx.port"] ? " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=#{@config["jmx.port"]} -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false" : '')
-      cmd << " -cp #{@service_dir}/conf:#{@service_dir}/libs/org.apache.felix.main-3.0.6.jar org.apache.felix.main.Main" #TODO ADD 'felix' directive to DSL
+      cmd << " -cp #{@service_dir}/conf:#{felix_jar} org.apache.felix.main.Main"
       cmd << " -b #{@service_dir}/libs"
       cmd << " #{@service_dir}/felix_cache"
         
