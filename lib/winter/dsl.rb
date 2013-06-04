@@ -24,13 +24,15 @@ module Winter
       @dependencies = []
       @options      = options
       @config       = {}
-      @felix        = lib('org.apache.felix', 'org.apache.felix.main', '3.0.6')
+      @directives   = {}
+      @felix        = nil
     end
 
     def self.evaluate( winterfile, options={} )
       # Must create instance for instance_eval to have correct scope
       dsl = DSL.new options
-      validate(dsl.eval_winterfile winterfile)
+      res = dsl.eval_winterfile winterfile
+      validate(res)
     end
 
     def eval_winterfile( winterfile, contents=nil )
@@ -40,11 +42,17 @@ module Winter
       Dir.chdir (File.split(winterfile.to_s)[0]) do
         instance_eval(contents)
       end
+      
+      # add default felix in context
+      if !@felix   #TODO Move default version somewhere
+        @felix = lib('org.apache.felix', 'org.apache.felix.main', '3.0.6')
+      end
+
       {
         :config       => @config,
         :dependencies => @dependencies,
         :felix        => @felix,
-        :directives   => []
+        :directives   => @directives
       }
     end
 
@@ -63,6 +71,10 @@ module Winter
 
     def info( msg=nil )
       $LOG.info msg
+    end
+
+    def directive( key, value=nil )
+      @directives[key] = value
     end
 
     def lib( group, artifact, version='LATEST', *args )

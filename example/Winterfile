@@ -14,7 +14,7 @@ group :net do
 end
 
 # core OSGi artifacts
-#felix 'org.apache.felix', 'org.apache.felix.main', '3.0.6'
+felix 'org.apache.felix', 'org.apache.felix.main', '3.0.1'
 lib 'org.apache.felix', 'org.apache.felix.shell', '1.4.3'
 lib 'org.apache.felix', 'org.apache.felix.shell.remote', '1.1.2'
 lib 'org.apache.felix', 'org.apache.felix.scr', '1.6.2'
@@ -23,3 +23,6 @@ lib 'org.apache.felix', 'org.apache.felix.fileinstall', '3.2.6'
 
 # application artifacts
 bundle 'com.liveops.sample', 'sample', '1.0.0-SNAPSHOT'
+
+directive 'add.test.directive', 60
+

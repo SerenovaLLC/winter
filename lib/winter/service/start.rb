@@ -1,6 +1,9 @@
 require 'winter/constants'
 require 'winter/logger'
 
+# TODO This needs a larger refactor to make it more functional and less reliant
+# upon class variables (@foo). HELP!
+
 module Winter
   class Service
 
@@ -19,6 +22,7 @@ module Winter
       @config['jmx.port']    = 6072
 
       #@config['log.dir'] = File.join(WINTERFELL_DIR,RUN_DIR,@config['service'],'logs')
+      @directives = {}
     end
 
     def start(winterfile, options)
@@ -33,6 +37,8 @@ module Winter
       @service_dir = File.join(File.split(winterfile)[0],RUN_DIR,@config['service'])
       @config['log.dir'] = File.join(@service_dir,'logs')
 
+      $LOG.debug tmp[:directives]
+      @directives.merge! tmp[:directives]
 
       java_cmd = generate_java_invocation
       java_cmd << " > #{@config['console.log']} 2>&1"
@@ -97,6 +103,7 @@ module Winter
       cmd << opt("log.dir",          @config['log.dir'])
       cmd << opt("service.conf.dir", @config['service.conf.dir'])
       cmd << opt(OPT_BUNDLE_DIR,     "#{@service_dir}/bundles")
+      cmd << add_directives( @directives )
       cmd << @config["osgi.shell.telnet.ip"]?" -Dosgi.shell.telnet.ip=#{@config["osgi.shell.telnet.ip"]}":''
       #cmd.push(add_code_coverage())
       cmd << (@config["jdb.port"] ? " -Xdebug -Xrunjdwp:transport=dt_socket,address=#{@config["jdb.port"]},server=y,suspend=n" : '')
@@ -108,6 +115,17 @@ module Winter
       return cmd.join(" \\\n ")
       #return cmd.join(" ")
     end 
+
+    def add_directives( dir )
+      tmp = ""
+      dir.each do |key, value|
+        tmp << " -D#{key}"
+        if value
+          tmp << "=#{value}"
+        end
+      end
+      tmp
+    end
 
     def opt(key, value)
       return " -D#{key}=#{value}"
