@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'winter/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "winterfell"
+  spec.name          = "winter"
   spec.version       = Winter::VERSION
   spec.authors       = ["S. Mikkel Wilson"]
   spec.email         = ["codebudo@gmail.com"]

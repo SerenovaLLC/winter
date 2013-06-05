@@ -12,7 +12,7 @@ require 'winter/service/validate'
 module Winter
   class CLI < Thor
 
-    desc "validate <Winterfile>", "(optional) Check the configuration files"
+    desc "validate [Winterfile]", "(optional) Check the configuration files"
     method_option :group, :desc => "Config group"
     def validate( winterfile='Winterfile' )
       s = Winter::Service.new
@@ -24,7 +24,7 @@ module Winter
       $LOG.info VERSION
     end
 
-    desc "start [winterfile]", "Start the services in [winterfile] "
+    desc "start [Winterfile]", "Start the services in [Winterfile] "
     method_option :group,   :desc => "Config group"
     method_option :verbose, :desc => "Verbose maven output"
     def start(winterfile='Winterfile')
@@ -32,7 +32,7 @@ module Winter
       s.start winterfile, options
     end
 
-    desc "stop [winterfile]", "Stop the services in [winterfile]"
+    desc "stop [Winterfile]", "Stop the services in [Winterfile]"
     method_option :group,   :desc => "Config group"
     def stop(winterfile='Winterfile')
       s = Winter::Service.new
@@ -47,7 +47,7 @@ module Winter
       end
     end
 
-    desc "build <Winterfile>", "Build a service from a Winterfile (optional)"
+    desc "build [Winterfile]", "Build a service from a Winterfile"
     method_option :group,   :desc => "Config group"
     method_option :verbose, :desc => "Verbose maven output"
     method_option :local,   :desc => "Resolve dependencies only from local repository"
