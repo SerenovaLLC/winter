@@ -45,7 +45,7 @@ module Winter
       
       # add default felix in context
       if !@felix   #TODO Move default version somewhere
-        @felix = lib('org.apache.felix', 'org.apache.felix.main', '3.0.6')
+        @felix = lib('org.apache.felix', 'org.apache.felix.main', '4.0.2')
       end
 
       {

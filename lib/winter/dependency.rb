@@ -49,8 +49,8 @@ module Winter
         $LOG.debug mvn_cmd
         $LOG.error("Failed to retrieve artifact: #{@group}:#{@artifact}:#{@version}:#{@package}")
       else
+        $LOG.info "#{@group}:#{@artifact}:#{@version}:#{@package}"
         $LOG.debug dest_file
-        #$LOG.debug "#{@group}:#{@artifact}:#{@version}:#{@package}"
       end
 
     end
