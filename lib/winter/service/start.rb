@@ -15,11 +15,12 @@ module Winter
       @config['log.level']   = 1
       @config['64bit']       = true
       @config['jvm.mx']      = '1g'
-      @config['console.log'] = '/dev/null'
+      @config['console']     = '/dev/null'
       @config['web.port']    = 8080
       @config['osgi.port']   = 6070
       @config['jdb.port']    = 6071
       @config['jmx.port']    = 6072
+      @config['service.conf.dir']    = "conf"
 
       #@config['log.dir'] = File.join(WINTERFELL_DIR,RUN_DIR,@config['service'],'logs')
       @directives = {}
@@ -28,20 +29,22 @@ module Winter
     def start(winterfile, options)
       tmp = DSL.evaluate winterfile, options
       tmp[:dependencies].each do |dep|
-        $LOG.debug "#{dep.group}.#{dep.artifact}"
+        $LOG.debug "dependency: #{dep.group}.#{dep.artifact}"
       end
       @felix = tmp[:felix]
 
-      @config.merge! tmp[:config]
+      @config.merge! tmp[:config] # add Winterfile 'directive' commands
+      @config.merge! options # overwrite @config with command-line options
       $LOG.debug @config
+
       @service_dir = File.join(File.split(winterfile)[0],RUN_DIR,@config['service'])
+
       @config['log.dir'] = File.join(@service_dir,'logs')
 
-      $LOG.debug tmp[:directives]
       @directives.merge! tmp[:directives]
 
       java_cmd = generate_java_invocation
-      java_cmd << " > #{@config['console.log']} 2>&1"
+      java_cmd << " > #{@config['console']} 2>&1"
       $LOG.debug java_cmd
 
       # execute
@@ -74,10 +77,8 @@ module Winter
     end
 
     def generate_java_invocation
-      java_bin = "#{@config['java_home']}/bin/"
       java_bin = find_java
 
-      $LOG.debug @felix
       felix_jar = File.join(@felix.destination,"#{@felix.artifact}-#{@felix.version}.#{@felix.package}")
 
       # start building the command
@@ -91,17 +92,19 @@ module Winter
       cmd << opt("felix.config.properties", "file:" + config_properties)
       cmd << opt("felix.log.level", felix_log_level(@config['log.level']))
 
-      system_properties = File.join(@service_dir, F_SYSTEM_PROPERTIES)
-      cmd << opt("felix.system.properties", "file:#{system_properties}")
+      #system_properties = File.join(@service_dir, F_SYSTEM_PROPERTIES)
+      #cmd << opt("felix.system.properties", "file:#{system_properties}")
 
+      # TODO remove these options when the logger bundle is updated to use the classpath
       logger_properties = File.join(@service_dir, "conf", F_LOGGER_PROPERTIES)
-      # TODO remove this option when the logger bundle is updated to use the classpath
-      cmd << opt("log4j.configuration", logger_properties)
+      logback_xml       = File.join(@service_dir, "conf", F_LOGBACK_XML)
+      cmd << opt("log4j.configuration",       logger_properties)
+      cmd << opt("logback.configurationFile", logback_xml)
     
       cmd << opt("web.port",         @config["web.port"])
       cmd << opt("osgi.port",        @config["osgi.port"])
       cmd << opt("log.dir",          @config['log.dir'])
-      cmd << opt("service.conf.dir", @config['service.conf.dir'])
+      cmd << opt("service.conf.dir", File.join(@service_dir, "conf"))
       cmd << opt(OPT_BUNDLE_DIR,     "#{@service_dir}/bundles")
       cmd << add_directives( @directives )
       cmd << @config["osgi.shell.telnet.ip"]?" -Dosgi.shell.telnet.ip=#{@config["osgi.shell.telnet.ip"]}":''
@@ -113,7 +116,6 @@ module Winter
       cmd << " #{@service_dir}/felix_cache"
         
       return cmd.join(" \\\n ")
-      #return cmd.join(" ")
     end 
 
     def add_directives( dir )

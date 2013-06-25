@@ -5,7 +5,6 @@ gemspec
 
 gem 'thor'
 gem 'bundler'
-gem 'maven_gem'
 
 gem 'multi_json'
 

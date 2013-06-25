@@ -4,14 +4,21 @@ repo "~/.m2/repository"
 repo "http://artifactory:8081/artifactory/"
 
 read "conf/default/wf_config.json"
-conf "conf/default"
 
 #pom "pom.xml"
 pom "example.pom"
 
+group :prod do
+  read "/lo/active/facts.json"
+end
+
+conf "conf/default"
+
 group :net do
   info "This group requires a net connection to work"
 end
+
+#lib 'org.apache.felix', 'org.apache.felix.configadmin', '1.4.0'
 
 # core OSGi artifacts
 felix 'org.apache.felix', 'org.apache.felix.main', '3.0.1'
@@ -20,6 +27,8 @@ lib 'org.apache.felix', 'org.apache.felix.shell.remote', '1.1.2'
 lib 'org.apache.felix', 'org.apache.felix.scr', '1.6.2'
 lib 'org.apache.felix', 'org.apache.felix.log', '1.0.1'
 lib 'org.apache.felix', 'org.apache.felix.fileinstall', '3.2.6'
+lib 'org.osgi', 'org.osgi.compendium', '4.3.1'
+lib 'org.osgi', 'org.osgi.core'      , '4.3.1'
 
 # application artifacts
 bundle 'com.liveops.sample', 'sample', '1.0.0-SNAPSHOT'

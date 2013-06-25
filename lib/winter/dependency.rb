@@ -20,7 +20,7 @@ module Winter
       @package      = 'jar'
       @offline      = false
       @transative   = false
-      @verbose      = false
+      @verbose      = false 
       @destination  = '.'
     end
 
@@ -46,6 +46,7 @@ module Winter
 
       result = system(mvn_cmd)
       if result == false
+        $LOG.debug mvn_cmd
         $LOG.error("Failed to retrieve artifact: #{@group}:#{@artifact}:#{@version}:#{@package}")
       else
         $LOG.debug dest_file
