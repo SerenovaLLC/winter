@@ -78,7 +78,6 @@ module Winter
     method_option :verbose, :desc => "Verbose maven output"
     method_option :debug,   :desc => "Set log level to debug."
     method_option :local,   :desc => "Resolve dependencies only from local repository"
-    method_option :getdependencies, :desc => "Pull dependencies from all repositories", :default => true
     def build( winterfile='Winterfile' )
       $LOG.level = Logger::DEBUG if options[:debug]
       s = Winter::Service.new

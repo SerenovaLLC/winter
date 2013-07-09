@@ -98,11 +98,10 @@ Build a service from a Winterfile
       winter build [Winterfile]
 
     Options:
-      [--group=GROUP]                      # Config group
-      [--verbose=VERBOSE]                  # Verbose maven output
-      [--local=LOCAL]                      # Resolve dependencies only from local repository
-      [--getdependencies=GETDEPENDENCIES]  # Pull dependencies from all repositories
-                                          # Default: true
+      [--group=GROUP]      # Config group
+      [--verbose=VERBOSE]  # Verbose maven output
+      [--debug=DEBUG]      # Set log level to debug.
+      [--local=LOCAL]      # Resolve dependencies only from local repository
 
 #### Start
 
@@ -112,8 +111,10 @@ Start the services in [Winterfile]
       winter start [Winterfile]
 
     Options:
-      [--group=GROUP]      # Config group
-      [--verbose=VERBOSE]  # Verbose maven output
+      [--group=GROUP]         # Config group
+      [--debug=DEBUG]         # Set log level to debug.
+  --con, [--console=CONSOLE]  # Send console output to [file]
+                              # Default: /dev/null
 
 #### Status
 
@@ -141,6 +142,7 @@ Check the configuration files
 
     Options:
       [--group=GROUP]  # Config group
+      [--debug=DEBUG]  # Set log level to debug.
 
 #### Version
 
@@ -152,8 +154,8 @@ Display version information.
 
 ## Winterfile DSL
 
-####bundle (group, artifact, [version])
-  Specify an application bundle to deploy into the OSGi container. If `version` is not speicfied, it will default to `LATEST`. Bundles added the Winterfile will be downoaded and placed in the './run/{name}/bundles' directory (relative to the Winterfile) when `winter build` is performed.
+####bundle (group, artifact, [version], [{}])
+  Specify an application bundle to deploy into the OSGi container. If `version` is not speicfied, it will default to `LATEST`. The 4th parameter is a block that can be used to specify the packaging type (defaults to 'jar'). For example, if the bundle is packaged as a war file, the block can read `{:package => 'war'}`. Bundles added the Winterfile will be downoaded and placed in the './run/{name}/bundles' directory (relative to the Winterfile) when `winter build` is performed.
 
 ####conf (directory)
   The contents of this directory tree is read and any file ending in '*.erb' is parsed as a template. The result of the template is placed in './run/{name}/conf' (relative to the Winterfile) and will overwrite any files that already exist there.
