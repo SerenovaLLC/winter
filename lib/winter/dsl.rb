@@ -1,11 +1,12 @@
-# This is the Domain Specific Language definition for the Winterfile
+#This is the Domain Specific Language definition for the Winterfile
 
 require 'open-uri'
 require 'json'
-#require 'maven_gem'
 
-require 'pom_fetcher'
-require 'pom_spec'
+require 'maven_pom'
+
+#require 'maven_gem/pom_fetcher'
+#require 'pom_spec'
 
 #require 'winter/bundles'
 require 'winter/constants'
@@ -120,11 +121,11 @@ module Winter
         raise "Poms must be URLs, paths to poms, or Strings"
       end
 
-      pom_file = MavenGem::PomFetcher.fetch(pom)
-      pom_spec = MavenGem::PomSpec.parse_pom(pom_file)
-      #$LOG.info pom_spec.dependencies
+      pom_file = MavenPom.fetch(pom)
+      pom_spec = MavenPom.parse_pom(pom_file)
+      #$LOG.debug pom_spec.dependencies
       pom_spec.dependencies.each do |dep|
-        #$LOG.debug dep
+        $LOG.debug dep
         if dep[:scope] == 'provided'
           lib( dep[:group], dep[:artifact], dep[:version] ) 
         end
