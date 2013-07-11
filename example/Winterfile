@@ -8,10 +8,6 @@ read "conf/default/wf_config.json"
 #pom "pom.xml"
 pom "example.pom"
 
-group :prod do
-  read "/lo/active/facts.json"
-end
-
 conf "conf/default"
 
 group :net do

@@ -9,7 +9,7 @@
     <scm>
       <url>https://github.liveops.com/${user}/osgi_sample</url>
       <connection>scm:git:git://git@github.liveops.com:${user}/osgi_sample.git</connection>
-      <developerConnection>scm:git:git://git@github.liveops.com:${user}/osig_sample.git</developerConnection>
+      <developerConnection>scm:git:git://git@github.liveops.com:${user}/osgi_sample.git</developerConnection>
     </scm>    
 
     <modelVersion>1.0.0</modelVersion>
@@ -24,7 +24,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>metadata</module>
         <module>sample_bundle</module>
     </modules>
 
@@ -336,15 +335,15 @@
         <repository>
             <id>remote-repos</id>
             <name>Remote Repositories</name>
-            <url>http://mvn-repo.lab.liveops.com:8081/artifactory/remote-repos</url>
+            <url>http://maven:8081/artifactory/remote-repos</url>
         </repository>
         <repository>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
             <id>libs-releases</id>
-            <name>mvn-repo.lab.liveops.com-releases</name>
-            <url>http://mvn-repo.lab.liveops.com:8081/artifactory/libs-releases</url>
+            <name>maven-releases</name>
+            <url>http://maven:8081/artifactory/libs-releases</url>
         </repository>
         <repository>
             <releases>
@@ -354,15 +353,15 @@
                 <enabled>true</enabled>
             </snapshots>
             <id>libs-snapshots</id>
-            <name>mvn-repo.lab.liveops.com-snapshots</name>
-            <url>http://mvn-repo.lab.liveops.com:8081/artifactory/libs-snapshots</url>
+            <name>maven-snapshots</name>
+            <url>http://maven:8081/artifactory/libs-snapshots</url>
         </repository>
     </repositories>
 
     <pluginRepositories>
         <pluginRepository>
             <id>plugins-releases</id>
-            <url>http://mvn-repo.lab.liveops.com:8081/artifactory/plugins-releases</url>
+            <url>http://maven:8081/artifactory/plugins-releases</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -372,7 +371,7 @@
         </pluginRepository>
         <pluginRepository>
             <id>plugins-snapshots</id>
-            <url>http://mvn-repo.lab.liveops.com:8081/artifactory/plugins-snapshots</url>
+            <url>http://maven:8081/artifactory/plugins-snapshots</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -384,14 +383,14 @@
 
     <distributionManagement>
         <repository>
-            <id>mvn-repo.lab.liveops.com</id>
-            <name>mvn-repo.lab.liveops.com-releases</name>
-            <url>http://mvn-repo.lab.liveops.com:8081/artifactory/libs-releases-local</url>
+            <id>maven</id>
+            <name>maven-releases</name>
+            <url>http://maven:8081/artifactory/libs-releases-local</url>
         </repository>
         <snapshotRepository>
-            <id>mvn-repo.lab.liveops.com</id>
-            <name>mvn-repo.lab.liveops.com-snapshots</name>
-            <url>http://mvn-repo.lab.liveops.com:8081/artifactory/libs-snapshots-local</url>
+            <id>maven</id>
+            <name>maven-snapshots</name>
+            <url>http://maven:8081/artifactory/libs-snapshots-local</url>
         </snapshotRepository>
     </distributionManagement>
 
