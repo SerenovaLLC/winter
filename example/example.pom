@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="${maven.repo.host}.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <organization>
         <name>LiveOps</name>
@@ -11,6 +11,10 @@
       <connection>scm:git:git://git@github.liveops.com:${user}/osgi_sample.git</connection>
       <developerConnection>scm:git:git://git@github.liveops.com:${user}/osgi_sample.git</developerConnection>
     </scm>    
+
+    <properties>
+        <maven.repo.host>http://artifactory</maven.repo.host>
+    </properties>
 
     <modelVersion>1.0.0</modelVersion>
     <groupId>com.liveops.sample</groupId>
@@ -335,7 +339,7 @@
         <repository>
             <id>remote-repos</id>
             <name>Remote Repositories</name>
-            <url>http://maven:8081/artifactory/remote-repos</url>
+            <url>${maven.repo.host}:8081/artifactory/remote-repos</url>
         </repository>
         <repository>
             <snapshots>
@@ -343,7 +347,7 @@
             </snapshots>
             <id>libs-releases</id>
             <name>maven-releases</name>
-            <url>http://maven:8081/artifactory/libs-releases</url>
+            <url>${maven.repo.host}:8081/artifactory/libs-releases</url>
         </repository>
         <repository>
             <releases>
@@ -354,14 +358,14 @@
             </snapshots>
             <id>libs-snapshots</id>
             <name>maven-snapshots</name>
-            <url>http://maven:8081/artifactory/libs-snapshots</url>
+            <url>${maven.repo.host}:8081/artifactory/libs-snapshots</url>
         </repository>
     </repositories>
 
     <pluginRepositories>
         <pluginRepository>
             <id>plugins-releases</id>
-            <url>http://maven:8081/artifactory/plugins-releases</url>
+            <url>${maven.repo.host}:8081/artifactory/plugins-releases</url>
             <releases>
                 <enabled>true</enabled>
             </releases>
@@ -371,7 +375,7 @@
         </pluginRepository>
         <pluginRepository>
             <id>plugins-snapshots</id>
-            <url>http://maven:8081/artifactory/plugins-snapshots</url>
+            <url>${maven.repo.host}:8081/artifactory/plugins-snapshots</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -385,12 +389,12 @@
         <repository>
             <id>maven</id>
             <name>maven-releases</name>
-            <url>http://maven:8081/artifactory/libs-releases-local</url>
+            <url>${maven.repo.host}:8081/artifactory/libs-releases-local</url>
         </repository>
         <snapshotRepository>
             <id>maven</id>
             <name>maven-snapshots</name>
-            <url>http://maven:8081/artifactory/libs-snapshots-local</url>
+            <url>${maven.repo.host}:8081/artifactory/libs-snapshots-local</url>
         </snapshotRepository>
     </distributionManagement>
 
