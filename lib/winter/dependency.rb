@@ -41,26 +41,24 @@ module Winter
     def getMaven
       dest_file = File.join(@destination,"#{@artifact}-#{@version}.#{@package}")
 
-      mvn_cmd = "mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get" \
-      + " -DremoteRepositories=#{@repositories.join(',')}" \
-      + " -Dtransitive=#{@transative}" \
-      + " -Dartifact=#{@group}:#{@artifact}:#{@version}:#{@package}" \
-      + " -Ddest=#{dest_file}"
+      c =  "mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get " 
+      c << " -DremoteRepositories=#{@repositories.join(',').shellescape}" 
+      c << " -Dtransitive=#{@transative}" 
+      c << " -Dartifact=#{@group.shellescape}:#{@artifact.shellescape}:#{@version.shellescape}:#{@package.shellescape}" 
+      c << " -Ddest=#{dest_file.shellescape}"
 
       if @offline
-        mvn_cmd << " --offline"
+        c << " --offline"
       end
 
       if !@verbose
-        #quiet mode
-        mvn_cmd << " -q"
-        #$LOG.debug mvn_cmd
+        #quiet mode is default
+        c << " -q"
       end
 
-
-      result = system(mvn_cmd)
+      result = system( c )
       if result == false
-        $LOG.debug mvn_cmd
+        $LOG.debug c
         $LOG.error("Failed to retrieve artifact: #{@group}:#{@artifact}:#{@version}:#{@package}")
       else
         $LOG.info "#{@group}:#{@artifact}:#{@version}:#{@package}"

@@ -28,14 +28,21 @@ module Winter
       f_pid = File.join(@service_dir, "pid")
 
       if File.exists?(f_pid)
-        pid_file = File.open(f_pid, "r")
-        pid = pid_file.read().to_i
+        pid = nil;
+        File.open(f_pid, "r") do |f|
+          pid = f.read().to_i
+        end
         Process.kill("TERM", -Process.getpgid(pid))
-        File.delete(f_pid)
+        begin
+          File.unlink(f_pid)
+        rescue
+          $LOG.error( "Error deleting PID file." )
+        end
       else
         $LOG.error("Failed to find process Id file: #{f_pid}")
-        exit
+        false
       end
+      true
     end
 
   end

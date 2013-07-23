@@ -14,6 +14,7 @@
 
 require 'winter/constants'
 require 'winter/logger'
+require 'shellwords'
 
 # TODO This needs a larger refactor to make it more functional and less reliant
 # upon class variables (@foo). HELP!
@@ -41,21 +42,24 @@ module Winter
     end
 
     def start(winterfile, options)
-      tmp = DSL.evaluate winterfile, options
-      tmp[:dependencies].each do |dep|
+      dsl = DSL.evaluate winterfile, options
+      dsl[:dependencies].each do |dep|
         $LOG.debug "dependency: #{dep.group}.#{dep.artifact}"
       end
-      @felix = tmp[:felix]
+      @felix = dsl[:felix]
 
-      @config.merge! tmp[:config] # add Winterfile 'directive' commands
+      @config.merge! dsl[:config] # add Winterfile 'directive' commands
       @config.merge! options # overwrite @config with command-line options
+      @config.each do |k,v|
+        v = v.shellescape if v.is_a? String
+      end
       $LOG.debug @config
 
-      @service_dir = File.join(File.split(winterfile)[0],RUN_DIR,@config['service'])
+      @service_dir = File.join(File.split(winterfile)[0],RUN_DIR,@config['service']).shellescape
 
       @config['log.dir'] = File.join(@service_dir,'logs')
 
-      @directives.merge! tmp[:directives]
+      @directives.merge! dsl[:directives]
 
       java_cmd = generate_java_invocation
       java_cmd << " > #{@config['console']} 2>&1"
@@ -96,7 +100,7 @@ module Winter
       felix_jar = File.join(@felix.destination,"#{@felix.artifact}-#{@felix.version}.#{@felix.package}")
 
       # start building the command
-      cmd = [ "#{java_bin} -server" ]
+      cmd = [ "#{java_bin.shellescape} -server" ]
       cmd << (@config["64bit"]==true ? " -d64 -XX:+UseCompressedOops":'')
       cmd << " -XX:MaxPermSize=256m -XX:NewRatio=3"
       cmd << " -Xmx#{@config['jvm.mx']}" 
@@ -105,9 +109,6 @@ module Winter
       config_properties = File.join(@service_dir, "conf", F_CONFIG_PROPERTIES)
       cmd << opt("felix.config.properties", "file:" + config_properties)
       cmd << opt("felix.log.level", felix_log_level(@config['log.level']))
-
-      #system_properties = File.join(@service_dir, F_SYSTEM_PROPERTIES)
-      #cmd << opt("felix.system.properties", "file:#{system_properties}")
 
       # TODO remove these options when the logger bundle is updated to use the classpath
       logger_properties = File.join(@service_dir, "conf", F_LOGGER_PROPERTIES)
@@ -125,7 +126,7 @@ module Winter
       #cmd.push(add_code_coverage())
       cmd << (@config["jdb.port"] ? " -Xdebug -Xrunjdwp:transport=dt_socket,address=#{@config["jdb.port"]},server=y,suspend=n" : '')
       cmd << (@config["jmx.port"] ? " -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=#{@config["jmx.port"]} -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false" : '')
-      cmd << " -cp #{@service_dir}/conf:#{felix_jar} org.apache.felix.main.Main"
+      cmd << " -cp #{@service_dir}/conf:#{felix_jar.to_s.shellescape} org.apache.felix.main.Main"
       cmd << " -b #{@service_dir}/libs"
       cmd << " #{@service_dir}/felix_cache"
         
@@ -135,16 +136,16 @@ module Winter
     def add_directives( dir )
       tmp = ""
       dir.each do |key, value|
-        tmp << " -D#{key}"
+        tmp << " -D"+Shellwords.escape(key)
         if value
-          tmp << "=#{value}"
+          tmp << "="+Shellwords.escape(value.to_s)
         end
       end
       tmp
     end
 
     def opt(key, value)
-      return " -D#{key}=#{value}"
+      " -D#{Shellwords.escape(key.to_s)}=#{Shellwords.escape(value.to_s)}"
     end
 
     def felix_log_level(level)

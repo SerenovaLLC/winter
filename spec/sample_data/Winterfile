@@ -23,7 +23,7 @@ plugin_version = "2.5"
 lib 'org.apache.maven.plugins', 'maven-dependency-plugin', plugin_version
 
 # core deps
-lib 'org.apache.felix', 'org.apache.felix.main', '3.0.6'
+felix 'org.apache.felix', 'org.apache.felix.main', '4.0.2'
 bundle 'org.apache.felix', 'org.apache.felix.fileinstall', '3.2.6'
 
 directive 'add.test.directive', 60
