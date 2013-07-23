@@ -51,6 +51,7 @@ module Winter
       @config.merge! dsl[:config] # add Winterfile 'directive' commands
       @config.merge! options # overwrite @config with command-line options
       @config.each do |k,v|
+        k = k.shellescape if k.is_a? String
         v = v.shellescape if v.is_a? String
       end
       $LOG.debug @config
