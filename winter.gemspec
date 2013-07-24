@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["codebudo@gmail.com"]
   spec.description   = %q{Application and configuration bundler for OSGi apps.}
   spec.summary       = %q{Use Winterfell to describe your OSGi application and its configuration. The command line tool (winter) can be used to assemble, start, stop, and verify the application.}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/liveops/winter"
   spec.license       = "Apache 2.0"
 
   spec.files         = `git ls-files`.split($/)
