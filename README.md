@@ -1,5 +1,7 @@
 # Winter
 
+[![Gem Version](https://badge.fury.io/rb/winter.png)](http://badge.fury.io/rb/winter)
+
 Winter is a system for maintaining the configuration of java web applications with a specific focus on the Felix OSGi container. Simply create a `Winterfile` and describe the configuration of your application with the Winter DSL. You can then use the `winter` CLI tool to `winter build` the appliation. This will download all the necessary dependencies for your application. When the build is complete, you can run it with `winter start`.
 
 ## Installation from Rubygems
