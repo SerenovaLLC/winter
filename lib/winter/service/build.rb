@@ -14,15 +14,36 @@
 
 require 'winter/constants'
 require 'winter/logger'
+require 'winter/service/status'
 
 module Winter
   class Service
 
     def build(winterfile, options)
       #dsl = DSL.new options
-      tmp = DSL.evaluate winterfile, options
-      dependencies = tmp[:dependencies]
+      dsl = DSL.evaluate winterfile, options
+      dependencies = dsl[:dependencies]
+      service = dsl[:config]['service']
+      service_dir = File.join(WINTERFELL_DIR,RUN_DIR,service)
       #$LOG.debug dependencies
+      
+      if options['clean'] and File.directory?(service_dir)
+        s = Winter::Service.new
+        stats = s.status
+        if stats.size == 0
+          FileUtils.rm_r dir
+          $LOG.debug "Deleted service directory #{dir}"
+        else
+          stats.each do |srvs,status|
+            $LOG.info "#{service} == #{srvs} && #{status}"
+            if service == srvs && status !~ /running/i
+              dir = File.join(WINTERFELL_DIR,RUN_DIR,service)
+              FileUtils.rm_r dir
+              $LOG.debug "Deleted service directory #{dir}"
+            end
+          end
+        end
+      end
 
       dependencies.each do |dep|
         dep.getMaven

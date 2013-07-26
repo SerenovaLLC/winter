@@ -17,7 +17,7 @@ end
 #lib 'org.apache.felix', 'org.apache.felix.configadmin', '1.4.0'
 
 # core OSGi artifacts
-felix 'org.apache.felix', 'org.apache.felix.main', '3.0.1'
+felix 'org.apache.felix', 'org.apache.felix.main', '4.0.2'
 lib 'org.apache.felix', 'org.apache.felix.shell', '1.4.3'
 lib 'org.apache.felix', 'org.apache.felix.shell.remote', '1.1.2'
 lib 'org.apache.felix', 'org.apache.felix.scr', '1.6.2'

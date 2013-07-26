@@ -19,13 +19,8 @@ require 'json'
 
 require 'maven_pom'
 
-#require 'maven_gem/pom_fetcher'
-#require 'pom_spec'
-
-#require 'winter/bundles'
 require 'winter/constants'
 require 'winter/dependency'
-#require 'winter/json_util'
 require 'winter/logger'
 require 'winter/templates'
 
@@ -137,7 +132,6 @@ module Winter
 
       pom_file = MavenPom.fetch(pom)
       pom_spec = MavenPom.parse_pom(pom_file)
-      #$LOG.debug pom_spec.dependencies
       pom_spec.dependencies.each do |dep|
         $LOG.debug dep
         if dep[:scope] == 'provided'
@@ -147,7 +141,6 @@ module Winter
     end
 
     def conf( dir )
-      #$LOG.debug( dir << " " << File.join(WINTERFELL_DIR,RUN_DIR,'conf') )
       process_templates( dir, File.join(WINTERFELL_DIR,RUN_DIR,@name,'conf') )
     end
 

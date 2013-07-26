@@ -13,5 +13,5 @@
 # under the License.
 
 module Winter
-  VERSION = "0.0.1"
+  VERSION = "0.0.2"
 end

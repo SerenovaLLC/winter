@@ -67,16 +67,20 @@ module Winter
 
     desc "status", "Show status of available services"
     def status
+      running = 0
       s = Winter::Service.new
       s.status.each do |service, status|
         $LOG.info " #{service} : #{status}"
+        running += 1 if status =~ /Running/i
       end
+      $LOG.info "#{running} services are running."
     end
 
     desc "build [Winterfile]", "Build a service from a Winterfile"
     method_option :group,   :desc => "Config group"
     method_option :verbose, :desc => "Verbose maven output"
     method_option :debug,   :desc => "Set log level to debug."
+    method_option :clean,   :desc => "Remove all artifacts before building."
     method_option :local,   :desc => "Resolve dependencies only from local repository"
     def build( winterfile='Winterfile' )
       $LOG.level = Logger::DEBUG if options[:debug]

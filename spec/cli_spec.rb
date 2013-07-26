@@ -54,7 +54,7 @@ describe Winter do
     it "Build a service from a manifest" do
       begin
         lambda {
-          args = ["build", "spec/sample_data/Winterfile"]
+          args = ["build", "spec/sample_data/Winterfile", "--clean"]
           cli = Winter::CLI.start( args )
         }.should_not raise_error
         Dir["run/default/libs"].include? "maven-dependency-plugin-2.5.jar"

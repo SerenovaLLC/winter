@@ -21,7 +21,8 @@ module Winter
     def status
       pid_files = Dir.glob(File.join(WINTERFELL_DIR,RUN_DIR, "**", "pid"))
       if( pid_files.length == 0 )
-        $LOG.info "No services are running."
+        #$LOG.info "No services are running."
+        return {}
       end
 
       services = {}
