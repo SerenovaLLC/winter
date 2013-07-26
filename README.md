@@ -10,7 +10,7 @@ Winter is a system for maintaining the configuration of java web applications wi
 
 ## Installation from source
 
-    $ git clone https://github.liveops.com/swilson/winter.git && cd winter
+    $ git clone git@github.com:liveops/winter.git && cd winter
     $ gem build winter.gemspec
     $ gem install winter*.gem
 
