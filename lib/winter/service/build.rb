@@ -31,15 +31,13 @@ module Winter
         s = Winter::Service.new
         stats = s.status
         if stats.size == 0
-          FileUtils.rm_r dir
-          $LOG.debug "Deleted service directory #{dir}"
+          FileUtils.rm_r service_dir
+          $LOG.debug "Deleted service directory #{service_dir}"
         else
           stats.each do |srvs,status|
-            $LOG.info "#{service} == #{srvs} && #{status}"
             if service == srvs && status !~ /running/i
-              dir = File.join(WINTERFELL_DIR,RUN_DIR,service)
-              FileUtils.rm_r dir
-              $LOG.debug "Deleted service directory #{dir}"
+              FileUtils.rm_r service_dir
+              $LOG.debug "Deleted service directory #{service_dir}"
             end
           end
         end
