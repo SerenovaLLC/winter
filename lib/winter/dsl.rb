@@ -49,7 +49,7 @@ module Winter
       contents ||= File.open(winterfile.to_s, "rb"){|f| f.read}
       
       # set CWD to where the winterfile is located
-      Dir.chdir (File.split(winterfile.to_s)[0]) do
+      Dir.chdir(File.split(winterfile.to_s)[0]) do
         instance_eval(contents)
       end
       

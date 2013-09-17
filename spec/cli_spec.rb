@@ -67,7 +67,7 @@ describe Winter do
     context "start, status and stop " do
       it "Start, status and stop a service" do
         begin
-          Dir.chdir (File.split("spec/sample_data/Winterfile")[0]) do
+          Dir.chdir(File.split("spec/sample_data/Winterfile")[0]) do
             lambda {
               Winter::CLI.start ["start" , "--debug"]
               Winter::CLI.start ["status"]
@@ -92,7 +92,7 @@ describe Winter do
     end
 
     after do
-      Dir.chdir (File.split("spec/sample_data/Winterfile")[0]) do
+      Dir.chdir(File.split("spec/sample_data/Winterfile")[0]) do
         Winter::CLI.start ["stop"]
       end
     end
