@@ -47,9 +47,9 @@ module Winter
     end
 
     desc "start [Winterfile]", "Start the services in [Winterfile] "
-    method_option :group,   :desc => "Config group"
-    #method_option :verbose, :desc => "Verbose maven output"
-    method_option :debug,   :desc => "Set log level to debug."
+    method_option :group,     :desc => "Config group"
+    method_option :debug,     :desc => "Set log level to debug."
+    method_option :daemonize, :desc => "Keep winter process running to trap system signals."
     method_option :console, :desc => "Send console output to [file]",
       :default => "/dev/null", :aliases => "--con"
     def start(winterfile='Winterfile')

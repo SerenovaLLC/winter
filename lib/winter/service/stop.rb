@@ -32,7 +32,14 @@ module Winter
         File.open(f_pid, "r") do |f|
           pid = f.read().to_i
         end
-        Process.kill("TERM", -Process.getpgid(pid))
+
+        begin
+          Process.getpgid pid
+          Process.kill("TERM", -Process.getpgid(pid))
+        rescue
+          $LOG.info( "Process #{pid} does not exist. Removing pid file." )
+        end
+
         begin
           File.unlink(f_pid)
         rescue

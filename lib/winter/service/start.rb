@@ -14,6 +14,7 @@
 
 require 'winter/constants'
 require 'winter/logger'
+require 'winter/service/stop'
 require 'shellwords'
 
 # TODO This needs a larger refactor to make it more functional and less reliant
@@ -72,13 +73,76 @@ module Winter
         exit
       end
       pid_file = File.open(File.join(@service_dir, "pid"), "w")
-      pid = fork do
+
+      # Normally, we'd just use Process.daemon for ruby 1.9, but for some
+      # reason the OSGi container we're using crashes when the CWD is changed
+      # to '/'. So, we'll just leave the CWD alone.
+      #Process.daemon(Dir.getwd,nil)
+
+      java_pid = fork do
         exec(java_cmd)
       end
+
+      pid = java_pid
+      pid = Process.pid if @config['daemonize'] 
       pid_file.write(pid)
       pid_file.close      
 
       $LOG.info "Started #{@config['service']} (#{pid})"
+
+      if( @config['daemonize'] )
+        stay_resident java_pid
+      end
+    end
+
+    def stay_resident( child_pid )
+      interrupted = false
+
+      #TERM, CONT STOP HUP ALRM INT and KILL
+      Signal.trap("EXIT") do
+        $LOG.debug "EXIT Terminating... #{$$}"
+        interrupted = true
+        begin
+          Process.getpgid child_pid 
+          Process.kill child_pid #skipped if process is alredy dead
+        rescue
+          $LOG.debug "Child pid (#{child_pid}) is already gone."
+        end
+        stop
+      end
+      Signal.trap("HUP") do
+        $LOG.debug "HUP Terminating... #{$$}"
+        interrupted = true
+      end
+      Signal.trap("TERM") do
+        $LOG.debug "TERM Terminating... #{$$}"
+        interrupted = true
+      end
+      Signal.trap("KILL") do
+        $LOG.debug "KILL Terminating... #{$$}"
+        interrupted = true
+      end
+      Signal.trap("CONT") do
+        $LOG.debug "CONT Terminating... #{$$}"
+        interrupted = true
+      end
+      Signal.trap("ALRM") do
+        $LOG.debug "ALRM Terminating... #{$$}"
+        interrupted = true
+      end
+      Signal.trap("INT") do
+        $LOG.debug "INT Terminating... #{$$}"
+        interrupted = true
+      end
+      Signal.trap("CHLD") do
+        $LOG.debug "CHLD Terminating... #{$$}"
+        #interrupted = true
+      end
+      #Process.detach(pid)
+
+      while 1
+        exit 0 if interrupted
+      end
     end
 
     def find_java
