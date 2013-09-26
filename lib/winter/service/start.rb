@@ -136,7 +136,7 @@ module Winter
       end
       Signal.trap("CHLD") do
         $LOG.debug "CHLD Terminating... #{$$}"
-        #interrupted = true
+        interrupted = true
       end
       #Process.detach(pid)
 
