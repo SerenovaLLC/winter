@@ -18,6 +18,7 @@ require 'winter/dsl'
 require 'winter/logger'
 require 'winter/version'
 require 'winter/service/build'
+require 'winter/service/fetch'
 require 'winter/service/start'
 require 'winter/service/status'
 require 'winter/service/stop'
@@ -86,6 +87,14 @@ module Winter
       $LOG.level = Logger::DEBUG if options[:debug]
       s = Winter::Service.new
       s.build( winterfile, options )
+    end
+
+    desc "fetch [URL]", "Download the Winterfile and configuration from a URL."
+    method_option :debug,   :desc => "Set log level to debug."
+    def fetch( url )
+      $LOG.level = Logger::DEBUG if options[:debug]
+      s = Winter::Service.new
+      s.fetch url 
     end
 
   end #class
