@@ -45,7 +45,7 @@ module Winter
       end
       
       #I hate waiting so this is going to become faster.
-      max_threads = 5 #make this configurable later. 
+      max_threads = 10 #make this configurable later. 
       active_threads = 0 
       Signal.trap("CHLD") do 
         #Reap everything you possibly can.
@@ -53,6 +53,8 @@ module Winter
           pid = waitpid(-1, Process::WNOHANG) 
           #puts "reaped #{pid}" if pid
           active_threads -= 1 if pid
+          rescue Errno::ECHILD
+            last 
         end while pid
       end
 
