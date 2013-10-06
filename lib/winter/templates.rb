@@ -22,6 +22,9 @@ def process_templates(source_templates, destination_dir)
     dest = destination_dir + tmpl.sub(%r{#{source_templates}},"").sub(/\.erb$/, "")
     #$LOG.debug "Processing: #{dest}"
     FileUtils.mkpath File.dirname(dest)
-    File.new(dest,'w').write(result)
+    File.open(dest,'w') do |f| 
+      f.write(result)
+      f.close()
+    end
   end
 end

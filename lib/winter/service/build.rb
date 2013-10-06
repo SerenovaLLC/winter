@@ -54,7 +54,7 @@ module Winter
           #puts "reaped #{pid}" if pid
           active_threads -= 1 if pid
           rescue Errno::ECHILD
-            last 
+            break 
         end while pid
       end
 
