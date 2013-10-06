@@ -91,11 +91,11 @@ module Winter
       $LOG.info "Started #{@config['service']} (#{pid})"
 
       if( @config['daemonize'] )
-        stay_resident java_pid
+        stay_resident(java_pid,winterfile)
       end
     end
 
-    def stay_resident( child_pid )
+    def stay_resident( child_pid, winterfile )
       interrupted = false
 
       #TERM, CONT STOP HUP ALRM INT and KILL
@@ -103,12 +103,13 @@ module Winter
         $LOG.debug "EXIT Terminating... #{$$}"
         interrupted = true
         begin
-          Process.getpgid child_pid 
-          Process.kill child_pid #skipped if process is alredy dead
+          stop winterfile
+         # not working...
+         # Process.getpgid child_pid 
+         # Process.kill child_pid #skipped if process is alredy dead
         rescue
           $LOG.debug "Child pid (#{child_pid}) is already gone."
         end
-        stop
       end
       Signal.trap("HUP") do
         $LOG.debug "HUP Terminating... #{$$}"
