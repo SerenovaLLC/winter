@@ -67,7 +67,7 @@ module Winter
         end
       end
       #wait for stragglers
-      Process.waitall
+      sleep while (active_threads > 0) 
     end
   end
 end
