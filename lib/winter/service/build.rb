@@ -69,7 +69,7 @@ module Winter
         end
       end
       #wait for stragglers
-      sleep while (active_threads > 0) 
+      sleep 1 while (active_threads > 0) 
     end
   end
 end
