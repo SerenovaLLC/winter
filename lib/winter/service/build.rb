@@ -15,6 +15,7 @@
 require 'winter/constants'
 require 'winter/logger'
 require 'winter/service/status'
+include Process
 
 module Winter
   class Service
@@ -42,11 +43,33 @@ module Winter
           end
         end
       end
+      
+      #I hate waiting so this is going to become faster.
+      max_threads = 10 #make this configurable later. 
+      active_threads = 0 
+      Signal.trap("CHLD") do 
+        #Reap everything you possibly can.
+        begin
+          pid = waitpid(-1, Process::WNOHANG) 
+          #puts "reaped #{pid}" if pid
+          active_threads -= 1 if pid
+          rescue Errno::ECHILD
+            break 
+        end while pid
+      end
 
       dependencies.each do |dep|
-        dep.getMaven
+        while (active_threads >= max_threads) do
+          #puts "Total active threads: #{active_threads}"
+          sleep 1 
+        end
+        active_threads += 1
+        fork do 
+          dep.getMaven
+        end
       end
+      #wait for stragglers
+      sleep while (active_threads > 0) 
     end
-
   end
 end
