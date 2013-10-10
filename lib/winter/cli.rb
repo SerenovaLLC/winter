@@ -89,12 +89,18 @@ module Winter
       s.build( winterfile, options )
     end
 
-    desc "fetch [URL]", "Download the Winterfile and configuration from a URL."
+    desc "fetch [URL|GROUP] <artifact> <version>", "Download the Winterfile and configuration from a URL."
     method_option :debug,   :desc => "Set log level to debug."
-    def fetch( url )
+    def fetch( url_or_group, artifact=nil, version='LATEST' )
       $LOG.level = Logger::DEBUG if options[:debug]
       s = Winter::Service.new
-      s.fetch url 
+      if( url_or_group =~ /^http:/ ) 
+        s.fetch_url url_or_group
+      elsif( !url_or_group.nil? && !artifact.nil? && !version.nil? )
+        s.fetch_GAV url_or_group, artifact, version
+      else
+        $LOG.error "Invalid arguments. See `winter help fetch`."
+      end
     end
 
   end #class
