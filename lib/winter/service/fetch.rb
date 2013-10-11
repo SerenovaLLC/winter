@@ -39,12 +39,12 @@ module Winter
       extract_jar file
     end
     
-    def fetch_GAV(group, artifact, version)
+    def fetch_GAV(group, artifact, version, repos=[])
       dep = Dependency.new
       dep.artifact      = artifact
       dep.group         = group
       dep.version       = version
-      #dep.repositories  = @repositories
+      dep.repositories  = repos
       #dep.package       = options[:package] || 'jar'
       #dep.offline       = @options['offline'] || @options['offline'] == 'true'
       dep.transative    = true
