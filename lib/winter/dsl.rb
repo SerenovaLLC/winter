@@ -40,6 +40,9 @@ module Winter
 
     def self.evaluate( winterfile, options={} )
       # Must create instance for instance_eval to have correct scope
+      if !File.exists?(winterfile)
+        raise "#{winterfile} not found."
+      end
       dsl = DSL.new options
       res = dsl.eval_winterfile winterfile
       validate(res)

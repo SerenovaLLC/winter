@@ -19,7 +19,12 @@ module Winter
   class Service
 
     def validate( winterfile='Winterfile', options={} )
-      DSL.evaluate winterfile, options
+      begin
+        DSL.evaluate winterfile, options
+      rescue Exception=>e
+        $LOG.error e
+        exit
+      end
     end
 
   end

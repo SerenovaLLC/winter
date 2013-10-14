@@ -99,7 +99,7 @@ module Winter
         s.fetch_url url_or_group
       #elsif( !url_or_group.nil? && !artifact.nil? && !version.nil? )
       elsif( !artifact.nil? )
-        repos = options[:repos] || ''
+        repos = options[:repositories] || ''
         repos = repos.split(',') 
         s.fetch_GAV url_or_group, artifact, version, repos
       else

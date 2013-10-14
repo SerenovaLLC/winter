@@ -56,9 +56,9 @@ module Winter
         c << " -q"
       end
 
+      $LOG.debug c
       result = system( c )
       if result == false
-        $LOG.debug c
         $LOG.error("Failed to retrieve artifact: #{@group}:#{@artifact}:#{@version}:#{@package}")
       else
         $LOG.info "#{@group}:#{@artifact}:#{@version}:#{@package}"

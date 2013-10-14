@@ -43,7 +43,13 @@ module Winter
     end
 
     def start(winterfile, options)
-      dsl = DSL.evaluate winterfile, options
+      begin
+        dsl = DSL.evaluate winterfile, options
+      rescue Exception=>e
+        $LOG.error e
+        exit
+      end
+
       dsl[:dependencies].each do |dep|
         $LOG.debug "dependency: #{dep.group}.#{dep.artifact}"
       end

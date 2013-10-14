@@ -22,7 +22,12 @@ module Winter
 
     def build(winterfile, options)
       #dsl = DSL.new options
-      dsl = DSL.evaluate winterfile, options
+      begin
+        dsl = DSL.evaluate winterfile, options
+      rescue Exception=>e
+        $LOG.error e
+        exit
+      end
       dependencies = dsl[:dependencies]
       service = dsl[:config]['service']
       service_dir = File.join(WINTERFELL_DIR,RUN_DIR,service)

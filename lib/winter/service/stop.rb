@@ -20,9 +20,14 @@ module Winter
 
     # stop winterfell service
     def stop(winterfile='Winterfile', options={})
-      tmp = DSL.evaluate winterfile, options
-      config = tmp[:config]
-      service = config['service']
+      begin
+        tmp = DSL.evaluate winterfile, options
+        config = tmp[:config]
+        service = config['service']
+      rescue Exception=>e
+        $LOG.error e
+        exit
+      end
 
       @service_dir = File.join(File.split(winterfile)[0],RUN_DIR,service)
       f_pid = File.join(@service_dir, "pid")
