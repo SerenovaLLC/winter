@@ -65,16 +65,26 @@ module Winter
 
       dependencies.each do |dep|
         while (active_threads >= max_threads) do
-          #puts "Total active threads: #{active_threads}"
+          $LOG.debug "Total active threads: #{active_threads}"
+          #$LOG.debug "threads: #{active_threads}"
           sleep 1 
         end
-        active_threads += 1
-        fork do 
-          dep.getMaven
+        #File.join(@destination,"#{@artifact}-#{@version}.#{@package}")
+        if !File.exists?(File.join(dep.destination,dep.outputFilename))
+          active_threads += 1
+          fork do 
+            dep.getMaven
+          end
+        else
+          $LOG.info "Already have #{dep.outputFilename}"
         end
       end
       #wait for stragglers
-      sleep 1 while (active_threads > 0) 
+      while (active_threads > 0) do 
+        sleep 1 
+        $LOG.debug "threads: #{active_threads}"
+      end
+
     end
   end
 end

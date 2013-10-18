@@ -39,7 +39,7 @@ module Winter
     end
 
     def getMaven
-      dest_file = File.join(@destination,"#{@artifact}-#{@version}.#{@package}")
+      dest_file = File.join(@destination,outputFilename)
 
       c =  "mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get " 
       c << " -DremoteRepositories=#{@repositories.join(',').shellescape}" 
@@ -64,7 +64,10 @@ module Winter
         $LOG.info "#{@group}:#{@artifact}:#{@version}:#{@package}"
         $LOG.debug dest_file
       end
+    end
 
+    def outputFilename
+      "#{@artifact}-#{@version}.#{@package}"
     end
   end
 
