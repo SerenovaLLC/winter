@@ -1,6 +1,5 @@
 name "osgi_sample"
 
-repo "~/.m2/repository"
 repo "http://artifactory:8081/artifactory/"
 
 read "conf/default/wf_config.json"

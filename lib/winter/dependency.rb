@@ -64,6 +64,7 @@ module Winter
         $LOG.info "#{@group}:#{@artifact}:#{@version}:#{@package}"
         $LOG.debug dest_file
       end
+      return result
     end
 
     def outputFilename

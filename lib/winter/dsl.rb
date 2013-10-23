@@ -98,7 +98,7 @@ module Winter
       dep.version       = version
       dep.repositories  = @repositories
       dep.package       = options[:package] || 'jar'
-      dep.offline       = @options['offline'] || @options['offline'] == 'true'
+      dep.offline       = @options['local'] || @options['local'] == 'true'
       dep.transative    = true
       dep.destination   = File.join(Dir.getwd,RUN_DIR,@name,LIBS_DIR)
       #dep.verbose       = true
@@ -115,7 +115,7 @@ module Winter
       dep.version       = version
       dep.repositories  = @repositories
       dep.package       = options[:package] || 'jar'
-      dep.offline       = @options['offline'] || @options['offline'] == 'true'
+      dep.offline       = @options['local'] || @options['local'] == 'true'
       dep.transative    = false
       dep.destination   = File.join(Dir.getwd,RUN_DIR,@name,BUNDLES_DIR)
       #dep.verbose       = true
