@@ -39,8 +39,9 @@ module Winter
         end
 
         begin
-          Process.getpgid pid
-          Process.kill("TERM", -Process.getpgid(pid))
+          pgid = Process.getpgid pid
+          pgid *= -1 if config['daemonize']
+          Process.kill("TERM", pgid)
         rescue
           $LOG.info( "Process #{pid} does not exist. Removing pid file." )
         end
