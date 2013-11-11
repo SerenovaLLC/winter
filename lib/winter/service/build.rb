@@ -46,6 +46,14 @@ module Winter
               $LOG.debug "Deleted service directory #{service_dir}"
             end
           end
+
+          # re-evaluate the DSL to get new dependencies
+          begin
+            dsl = DSL.evaluate winterfile, options
+          rescue Exception=>e
+            $LOG.error e
+            exit
+          end
         end
       end
       
