@@ -83,13 +83,15 @@ All commands that need a `Winterfile` will use the default filename 'Winterfile'
 ```bash
 $ winter
 Commands:
-  winter build [Winterfile]     # Build a service from a Winterfile
-  winter help [COMMAND]         # Describe available commands or one specific...
-  winter start [Winterfile]     # Start the services in [Winterfile] 
-  winter status                 # Show status of available services
-  winter stop [Winterfile]      # Stop the services in [Winterfile]
-  winter validate [Winterfile]  # (optional) Check the configuration files
-  winter version                # Display version information.
+  winter build [Winterfile]                      # Build a service from a Win...
+  winter fetch <URL|GROUP> [artifact] [version]  # Download the Winterfile an...
+  winter help [COMMAND]                          # Describe available command...
+  winter start [Winterfile]                      # Start the services in [Win...
+  winter status                                  # Show status of available s...
+  winter stop [Winterfile]                       # Stop the services in [Wint...
+  winter validate [Winterfile]                   # (optional) Check the confi...
+  winter version                                 # Display version information.
+
 ```
 
 #### Build
@@ -104,6 +106,17 @@ Build a service from a Winterfile
       [--verbose=VERBOSE]  # Verbose maven output
       [--debug=DEBUG]      # Set log level to debug.
       [--local=LOCAL]      # Resolve dependencies only from local repository
+
+#### Fetch
+
+    Download the Winterfile and configuration from a URL.
+
+    Usage:
+      winter fetch <URL|GROUP> [artifact] [version]
+
+    Options:
+          [--debug=DEBUG]                     # Set log level to debug.
+      --repos, [--repositories=REPOSITORIES]  # Comma separated list of repositories to search.
 
 #### Start
 
