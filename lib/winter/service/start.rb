@@ -83,7 +83,6 @@ module Winter
         $LOG.error "PID file already exists. Is the process running?"
         exit
       end
-      pid_file = File.open(File.join(@service_dir, "pid"), "w")
 
       # Normally, we'd just use Process.daemon for ruby 1.9, but for some
       # reason the OSGi container we're using crashes when the CWD is changed
@@ -98,6 +97,7 @@ module Winter
         exec(java_cmd)
       end
 
+      pid_file = File.open(File.join(@service_dir, "pid"), "w")
       pid = java_pid
       pid_file.write(pid)
       pid_file.close      
