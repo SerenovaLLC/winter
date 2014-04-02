@@ -40,8 +40,8 @@ module Winter
 
     def getMaven
       dest_file = File.join(@destination,outputFilename)
-
-      c =  "mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get " 
+      
+      c =  "exec mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get " 
       c << " -DremoteRepositories=#{@repositories.join(',').shellescape}" 
       c << " -Dtransitive=#{@transative}" 
       c << " -Dartifact=#{@group.shellescape}:#{@artifact.shellescape}:#{@version.shellescape}:#{@package.shellescape}" 

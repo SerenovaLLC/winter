@@ -31,14 +31,17 @@ module Winter
         service = f_pid.sub( %r{#{WINTERFELL_DIR}/#{RUN_DIR}/([^/]+)/pid}, '\1')
         pid_file = File.open(f_pid, "r")
         pid = pid_file.read().to_i
-      
-        begin
-          Process.getpgid( pid )
-          running = "Running"
-        rescue Errno::ESRCH
-          running = "Dangling pid file : #{f_pid}"
+        
+        if pid <= 0 
+          running = "A pid of zero was found... something bad is going on" 
+        else 
+          begin
+            Process.getpgid( pid )
+            running = "Running"
+          rescue Errno::ESRCH
+            running = "Dangling pid file : #{f_pid}"
+          end
         end
-
         services["#{service} (#{pid})"] = "#{running}"
       end
 

@@ -31,23 +31,39 @@ module Winter
 
       @service_dir = File.join(File.split(winterfile)[0],RUN_DIR,service)
       f_pid = File.join(@service_dir, "pid")
-
       if File.exists?(f_pid)
-        pid = nil;
+        pid = nil
+        pid_string = nil
         File.open(f_pid, "r") do |f|
-          pid = f.read().to_i
+          pid_string = f.read()
+          pid = pid_string.to_i
         end
 
-        begin
-          pgid = Process.getpgid pid
-          pgid *= -1 if !config['daemonize']
-          Process.kill("TERM", pgid)
-        rescue => e
-          $LOG.debug( e )
-          $LOG.info( "Process #{pid} does not exist. Removing pid file." )
+        #Send a TERM to the container if we have a non bogus pid
+        if pid > 0 
+          begin
+            $LOG.info("Attempting to terminate #{pid}")
+            Process.kill("TERM", pid)
+          rescue => e
+            $LOG.debug( e )
+            $LOG.info("Unable to control process with pid #{pid}.")
+            $LOG.info("Either your user has insufficent rights, or the process doesn't exist")
+          end
+          
+          #Wait for things to stop. 
+          begin 
+            $LOG.info("Waiting for the process with pid #{pid} to stop")
+            sleep 1 while Process.kill(0,pid)
+          rescue => e
+            $LOG.info("The container seems to have exited.")
+          end
+        else
+          $LOG.info("An invalid pid value was found in the pid file. (\"#{pid_string}\" was parsed as #{pid})")
         end
-
+        
+        #If things worked (Or we couldn't find a pid)... then we're good to delete. 
         begin
+          $LOG.info("Removing the pid file")
           File.unlink(f_pid)
         rescue
           $LOG.error( "Error deleting PID file." )

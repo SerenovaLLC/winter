@@ -70,86 +70,39 @@ module Winter
       @directives.merge! dsl[:directives]
 
       java_cmd = generate_java_invocation
-      java_cmd << " > #{@config['console']} 2>&1"
+      
+      if @config['daemonize']
+        java_cmd <<  " 2>&1 " #"don't eat the log thats evil"
+      else 
+        java_cmd << " > #{@config['console']} 2>&1"
+      end
       $LOG.debug java_cmd
 
-      # execute
+      # 
       if( File.exists?(File.join(@service_dir, "pid")) )
         $LOG.error "PID file already exists. Is the process running?"
         exit
       end
-      pid_file = File.open(File.join(@service_dir, "pid"), "w")
 
       # Normally, we'd just use Process.daemon for ruby 1.9, but for some
       # reason the OSGi container we're using crashes when the CWD is changed
       # to '/'. So, we'll just leave the CWD alone.
       #Process.daemon(Dir.getwd,nil)
-
+      
+      exec(java_cmd) if @config['daemonize'] #Let the child eat winter so things are awesome for daemontools
+      #We never hit the past this point if  we went to daemonize mode.
+      
+      #If we're not trying to run as a daemon just fork and let the subprocess be eaten
       java_pid = fork do
         exec(java_cmd)
       end
 
+      pid_file = File.open(File.join(@service_dir, "pid"), "w")
       pid = java_pid
-      pid = Process.pid if @config['daemonize'] 
       pid_file.write(pid)
       pid_file.close      
 
       $LOG.info "Started #{@config['service']} (#{pid})"
-
-      if( @config['daemonize'] )
-        stay_resident(java_pid,winterfile)
-      end
-    end
-
-    def stay_resident( child_pid, winterfile )
-      interrupted = false
-
-      #TERM, CONT STOP HUP ALRM INT and KILL
-      Signal.trap("EXIT") do
-        $LOG.debug "EXIT Terminating... #{$$}"
-        interrupted = true
-        begin
-          stop winterfile
-         # not working...
-         # Process.getpgid child_pid 
-         # Process.kill child_pid #skipped if process is alredy dead
-        rescue
-          $LOG.debug "Child pid (#{child_pid}) is already gone."
-        end
-      end
-      Signal.trap("HUP") do
-        $LOG.debug "HUP Terminating... #{$$}"
-        interrupted = true
-      end
-      Signal.trap("TERM") do
-        $LOG.debug "TERM Terminating... #{$$}"
-        interrupted = true
-      end
-      Signal.trap("KILL") do
-        $LOG.debug "KILL Terminating... #{$$}"
-        interrupted = true
-      end
-      Signal.trap("CONT") do
-        $LOG.debug "CONT Terminating... #{$$}"
-        interrupted = true
-      end
-      Signal.trap("ALRM") do
-        $LOG.debug "ALRM Terminating... #{$$}"
-        interrupted = true
-      end
-      Signal.trap("INT") do
-        $LOG.debug "INT Terminating... #{$$}"
-        interrupted = true
-      end
-      Signal.trap("CHLD") do
-        $LOG.debug "CHLD Terminating... #{$$}"
-        interrupted = true
-      end
-      #Process.detach(pid)
-
-      while 1
-        exit 0 if interrupted
-      end
     end
 
     def find_java
@@ -172,7 +125,7 @@ module Winter
       felix_jar = File.join(@felix.destination,"#{@felix.artifact}-#{@felix.version}.#{@felix.package}")
 
       # start building the command
-      cmd = [ "#{java_bin.shellescape} -server" ]
+      cmd = [ "exec #{java_bin.shellescape} -server" ] 
       cmd << (@config["64bit"]==true ? " -d64 -XX:+UseCompressedOops":'')
       cmd << " -XX:MaxPermSize=256m -XX:NewRatio=3"
       cmd << " -Xmx#{@config['jvm.mx']}" 

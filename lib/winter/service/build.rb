@@ -60,18 +60,21 @@ module Winter
       #I hate waiting so this is going to become faster.
       max_threads = 10 #make this configurable later. 
       active_threads = 0 
+      error = false
       Signal.trap("CHLD") do 
         #Reap everything you possibly can.
         begin
-          pid = waitpid(-1, Process::WNOHANG) 
+          pid, status = waitpid2(-1, Process::WNOHANG) 
           #puts "reaped #{pid}" if pid
-          active_threads -= 1 if pid
+          if pid
+            active_threads -= 1 
+            error = true if status.exitstatus > 0 
+          end
           rescue Errno::ECHILD
             break 
         end while pid
       end
 
-      error = false
       dependencies.each do |dep|
         while (active_threads >= max_threads) do
           $LOG.debug "Total active threads: #{active_threads}"
@@ -82,8 +85,10 @@ module Winter
         if !File.exists?(File.join(dep.destination,dep.outputFilename))
           active_threads += 1
           fork do 
-            result = dep.getMaven
-            error = true if result == false
+            #Get the dependency and Vomit up an error code if we fail
+            #If we don't do this then the main proc has no idea the build
+            # was garbage 
+            exit 1 unless dep.getMaven 
           end
         else
           $LOG.info "Already have #{dep.outputFilename}"
