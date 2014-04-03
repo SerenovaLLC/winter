@@ -70,7 +70,7 @@ module Winter
     end
 
     def getMaven
-      return get #just testing
+      get unless @offline #Skip the pig that is mvn if we're going to the artifactory
       dest_file = File.join(@destination,outputFilename)
       
       c =  "exec mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get " 
