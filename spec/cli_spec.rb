@@ -34,7 +34,8 @@ describe Winter do
       begin 
         lambda {
           cli = Winter::CLI.new
-          cli.fetch 'com.liveops.sample', 'winter', '1.0.0-SNAPSHOT'
+          cli.fetch 'com.liveops.sample', 'sample', '1.0.0-SNAPSHOT'
+          #cli.fetch 'http://artifactory:8081/artifactory/libs-all/', 'sample', '1.0.0-SNAPSHOT'
         }.should_not raise_error
       end
     end
@@ -66,7 +67,7 @@ describe Winter do
     it "Build a service from a manifest" do
       begin
         lambda {
-          args = ["build", "spec/sample_data/Winterfile", "--clean", "--local"]
+          args = ["build", "spec/sample_data/Winterfile", "--clean"]
           cli = Winter::CLI.start( args )
         }.should_not raise_error
         Dir["run/default/libs"].include? "maven-dependency-plugin-2.5.jar"
@@ -79,7 +80,7 @@ describe Winter do
     context "start, status and stop " do
       before "build service to get artifacts." do
         lambda {
-          args = ["build", "spec/sample_data/Winterfile", "--clean", "--local"]
+          args = ["build", "spec/sample_data/Winterfile", "--clean"]
           cli = Winter::CLI.start( args )
         }.should_not raise_error
       end
@@ -90,12 +91,8 @@ describe Winter do
             lambda {
               Winter::CLI.start ["start"]
               Winter::CLI.start ["status"]
-              #Winter::CLI.start ["stop"]
+              Winter::CLI.start ["stop"]
             }.should_not raise_error
-            #lambda {
-            #  puts "TRYING STOP"
-            #  Winter::CLI.start ["stop"]
-            #}.should_not raise_error
           end
         end
       end
@@ -113,7 +110,7 @@ describe Winter do
 
     after do
       Dir.chdir(File.split("spec/sample_data/Winterfile")[0]) do
-        #Winter::CLI.start ["stop"]
+        Winter::CLI.start ["stop"]
       end
 
       FileUtils.rm_r( "spec/sample_data/run" )
