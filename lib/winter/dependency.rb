@@ -39,22 +39,36 @@ module Winter
       @verbose      = false 
       @destination  = '.'
     end
+    
+    def get    
+      FileUtils.mkdir_p @destination unless File.directory?(@destination) 
+      #Skip the pig that is mvn if we're going to the artifactory
+      success = getLocalM2
+      success = getRestArtifactory if ! success and ! @offline 
+      success = getMaven if ! success and system( 'which mvn > /dev/null' ) #Falback to mvn... if we can :(
+      return success
+    end
+    
+    def artifactory_path
+      "#{@group.gsub(/\./,'/')}/#{@artifact}/#{@version}/#{@artifact}-#{@version}.#{@package}"
+    end
 
-    def get 
-      dest_file = File.join(@destination,outputFilename)
+    def dest_file
+      File.join(@destination,outputFilename)
+    end
+
+    def getRestArtifactory 
       $LOG.info "Try and fetch #{dest_file}."
       $LOG.debug "Create the destination folder if its not already there."
-      FileUtils.mkdir_p @destination 
       success = false
       @repositories.each { |repo| 
-        c =  "exec wget "
-        c << "#{repo}/#{@group.gsub(/\./,'/')}/#{@artifact}/#{@version}/#{@artifact}-#{@version}.#{@package}"
+        c =  "exec wget #{repo}/#{artifactory_path}"
         c << " -O #{dest_file} &>/dev/null"
         $LOG.info c 
         
         if system( c )
           success = true
-          m = "curl #{repo}/#{@group.gsub(/\./,'/')}/#{@artifact}/#{@version}/#{@artifact}-#{@version}.#{@package}.md5 2>/dev/null"
+          m = "curl #{repo}/#{artifactory_path}.md5 2>/dev/null"
           $LOG.debug m
           artifactory_md5 = `#{m}`
           my_md5 = Digest::MD5.file("#{dest_file}").hexdigest
@@ -68,11 +82,21 @@ module Winter
       $LOG.info "Fetch Successful." if success 
       return success
     end
+    
+    def getLocalM2 
+      begin
+        artifact = "#{ENV["HOME"]}/.m2/repository/#{artifactory_path}"
+        $LOG.info "Copying #{artifact} to #{dest_file}"
+        FileUtils.cp(artifact,dest_file)
+      rescue Exception=>e
+        $LOG.error e 
+        return false
+      end
+      return true
+    end
 
+    #Depricated because its slow and expensive to use... leaving it here for now.
     def getMaven
-      get unless @offline #Skip the pig that is mvn if we're going to the artifactory
-      dest_file = File.join(@destination,outputFilename)
-      
       c =  "exec mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get " 
       c << " -DremoteRepositories=#{@repositories.join(',').shellescape}" 
       c << " -Dtransitive=#{@transative}" 
