@@ -13,6 +13,8 @@
 # under the License.
 
 require 'winter/logger'
+require 'fileutils'
+require 'digest/md5'
 
 module Winter
 
@@ -38,7 +40,37 @@ module Winter
       @destination  = '.'
     end
 
+    def get 
+      dest_file = File.join(@destination,outputFilename)
+      $LOG.info "Try and fetch #{dest_file}."
+      $LOG.debug "Create the destination folder if its not already there."
+      FileUtils.mkdir_p @destination 
+      success = false
+      @repositories.each { |repo| 
+        c =  "exec wget "
+        c << "#{repo}/#{@group.gsub(/\./,'/')}/#{@artifact}/#{@version}/#{@artifact}-#{@version}.#{@package}"
+        c << " -O #{dest_file} &>/dev/null"
+        $LOG.info c 
+        
+        if system( c )
+          success = true
+          m = "curl #{repo}/#{@group.gsub(/\./,'/')}/#{@artifact}/#{@version}/#{@artifact}-#{@version}.#{@package}.md5 2>/dev/null"
+          $LOG.debug m
+          artifactory_md5 = `#{m}`
+          my_md5 = Digest::MD5.file("#{dest_file}").hexdigest
+          $LOG.info "Comparing remote MD5 #{artifactory_md5} to local md5 #{my_md5} (#{dest_file})" 
+          break if artifactory_md5 == my_md5
+          $LOG.info "Comparison failed. Deleting the jar and signalling a failure" 
+          success = false
+          FileUtils.rm(dest_file)
+        end
+      }
+      $LOG.info "Fetch Successful." if success 
+      return success
+    end
+
     def getMaven
+      return get #just testing
       dest_file = File.join(@destination,outputFilename)
       
       c =  "exec mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get " 
