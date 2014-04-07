@@ -88,7 +88,7 @@ module Winter
             #Get the dependency and Vomit up an error code if we fail
             #If we don't do this then the main proc has no idea the build
             # was garbage 
-            exit 1 unless dep.getMaven 
+            exit 1 unless dep.get
           end
         else
           $LOG.info "Already have #{dep.outputFilename}"
