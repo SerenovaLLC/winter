@@ -67,7 +67,12 @@ module Winter
     end
     
     def restRequest(uri)
-      response = Net::HTTP.get_response(uri)
+      begin
+        response = Net::HTTP.get_response(uri)
+      rescue Exception => e
+        raise "Could not retrieve artifact"
+      end
+
       $LOG.debug "#{outputFilename}: Rest request to #{uri.inspect} #{response.inspect}"
       return response.body if response.is_a?(Net::HTTPSuccess)
       raise "Rest request got a bad response code back [#{response.code}]" 
@@ -82,7 +87,7 @@ module Winter
             file.write(restRequest(URI.parse("#{repo}/#{artifactory_path}")))
           }
         rescue RuntimeError => e # :( Maybe do better handling later. 
-          $LOG.error "#{outputFilename}: Unable to fetch Artifact from #{repo}/#{artifactory_path}"  
+          $LOG.debug "#{outputFilename}: Unable to fetch Artifact from #{repo}/#{artifactory_path}"  
           $LOG.debug e
           next
         end 
@@ -126,7 +131,7 @@ module Winter
 
     #Depricated because its slow and expensive to use... leaving it here for now.
     def getMaven
-      c =  "exec mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get " 
+      c =  "mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get " 
       c << " -DremoteRepositories=#{@repositories.join(',').shellescape}" 
       c << " -Dtransitive=#{@transative}" 
       c << " -Dartifact=#{@group.shellescape}:#{@artifact.shellescape}:#{@version.shellescape}:#{@package.shellescape}" 
@@ -143,11 +148,11 @@ module Winter
 
       $LOG.debug c
       result = system( c )
-      if result == false
+      if result != true
         $LOG.error("Failed to retrieve artifact: #{@group}:#{@artifact}:#{@version}:#{@package}")
       else
-        $LOG.info "#{@group}:#{@artifact}:#{@version}:#{@package}"
-        $LOG.debug dest_file
+        $LOG.debug "#{@group}:#{@artifact}:#{@version}:#{@package}"
+        $LOG.info "[maven]  #{outputFilename}"
       end
       return result
     end
