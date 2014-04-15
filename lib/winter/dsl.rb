@@ -144,7 +144,9 @@ module Winter
     end
 
     def conf( dir )
-      process_templates( dir, File.join(WINTERFELL_DIR,RUN_DIR,@name,'conf') )
+      #We strip off the final / to normalize the input.
+      #If we don't do that then process_templates will end up with crazy file names. 
+      process_templates( dir.sub(/\/$/,""), File.join(WINTERFELL_DIR,RUN_DIR,@name,'conf') )
     end
 
     def read( file )
