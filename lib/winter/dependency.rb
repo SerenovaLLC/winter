@@ -81,7 +81,7 @@ module Winter
           open(dest_file,"wb") { |file|
             file.write(restRequest(URI.parse("#{repo}/#{artifactory_path}")))
           }
-        rescue RuntimeError => e # :( Maybe do better handling later. 
+        rescue SocketError,RuntimeError => e # :( Maybe do better handling later. 
           $LOG.error "#{outputFilename}: Unable to fetch Artifact from #{repo}/#{artifactory_path}"  
           $LOG.debug e
           next
@@ -90,7 +90,7 @@ module Winter
         begin
           artifactory_md5 = restRequest(URI.parse("#{repo}/#{artifactory_path}.md5"))
           my_md5 = Digest::MD5.file("#{dest_file}").hexdigest
-        rescue RuntimeError => e # :( Do better handling later. 
+        rescue SocketError, RuntimeError => e # :( Do better handling later. 
           $LOG.error "#{outputFilename}: Blew up while attempting to get md5s."
         else
           if artifactory_md5 == my_md5
