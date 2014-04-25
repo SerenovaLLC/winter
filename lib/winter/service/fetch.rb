@@ -34,6 +34,7 @@ module Winter
       rescue Exception=>e
         $LOG.error "Could not fetch winter configuration from : #{url}"
         $LOG.debug e
+        exit(-1)
       end
 
       extract_jar file
@@ -61,6 +62,7 @@ module Winter
       rescue Exception=>e
         $LOG.error "#{file} is corrupt or invalid."
         $LOG.debug e
+        exit(-1)
       end
       
       cleanup file
