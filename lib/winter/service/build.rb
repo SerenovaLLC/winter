@@ -65,7 +65,6 @@ module Winter
         #Reap everything you possibly can.
         begin
           pid, status = waitpid2(-1, Process::WNOHANG) 
-          #puts "reaped #{pid}" if pid
           if pid
             active_threads -= 1 
             error = true if status.exitstatus > 0 
@@ -78,10 +77,8 @@ module Winter
       dependencies.each do |dep|
         while (active_threads >= max_threads) do
           $LOG.debug "Total active threads: #{active_threads}"
-          #$LOG.debug "threads: #{active_threads}"
           sleep 1 
         end
-        #File.join(@destination,"#{@artifact}-#{@version}.#{@package}")
         if !File.exists?(File.join(dep.destination,dep.outputFilename))
           active_threads += 1
           fork do 
