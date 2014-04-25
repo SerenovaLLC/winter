@@ -68,13 +68,14 @@ module Winter
     
     def restRequest(uri)
       response = Net::HTTP.get_response(uri)
-      $LOG.debug "#{outputFilename}: Rest request to #{uri.inspect} #{response.inspect}"
       return response.body if response.is_a?(Net::HTTPSuccess)
+      $LOG.debug "#{outputFilename}: Rest request to #{uri.inspect} #{response.inspect}"
       raise "Rest request got a bad response code back [#{response.code}]" 
     end
     
     def getRestArtifactory 
-      $LOG.debug "#{outputFilename}: Attempting to fetch via the artifactory rest api."
+      log_prefix = '[remote] '
+      $LOG.debug "#{log_prefix}#{outputFilename}: Attempting to fetch via the artifactory rest api."
       #Loop through all the repos until something works
       @repositories.each { |repo| 
         begin
@@ -82,7 +83,7 @@ module Winter
             file.write(restRequest(URI.parse("#{repo}/#{artifactory_path}")))
           }
         rescue SocketError,RuntimeError => e # :( Maybe do better handling later. 
-          $LOG.error "#{outputFilename}: Unable to fetch Artifact from #{repo}/#{artifactory_path}"  
+          $LOG.error "#{log_prefix}#{outputFilename}: Unable to fetch Artifact from #{repo}/#{artifactory_path}"  
           $LOG.debug e
           next
         end 
@@ -91,15 +92,15 @@ module Winter
           artifactory_md5 = restRequest(URI.parse("#{repo}/#{artifactory_path}.md5"))
           my_md5 = Digest::MD5.file("#{dest_file}").hexdigest
         rescue SocketError, RuntimeError => e # :( Do better handling later. 
-          $LOG.error "#{outputFilename}: Blew up while attempting to get md5s."
+          $LOG.error "#{log_prefix}#{outputFilename}: Blew up while attempting to get md5s."
         else
           if artifactory_md5 == my_md5
-            $LOG.debug "#{outputFilename}: Successfully fetched via artifactory rest api."
-            $LOG.info "[remote] #{outputFilename}"
+            $LOG.debug "#{log_prefix}#{outputFilename}: Successfully fetched via artifactory rest api."
+            $LOG.info "#{log_prefix}#{outputFilename}"
             return true 
           end
-          $LOG.error "#{outputFilename}: Comparing remote MD5 #{artifactory_md5} to local md5 #{my_md5} (#{dest_file})" 
-          $LOG.error "#{outputFilename}: Comparison failed. Deleting the 'bad' jar and moving on." 
+          $LOG.error "#{log_prefix}#{outputFilename}: Comparing remote MD5 #{artifactory_md5} to local md5 #{my_md5} (#{dest_file})" 
+          $LOG.error "#{log_prefix}#{outputFilename}: Comparison failed. Deleting the 'bad' jar and moving on." 
           FileUtils.rm(dest_file)
         end
       }
@@ -107,18 +108,19 @@ module Winter
     end
     
     def getLocalM2 
+      log_prefix = "[local]  "
       begin
         artifact = "#{ENV["HOME"]}/.m2/repository/#{artifactory_path}"
-        $LOG.debug "#{outputFilename}: Copying #{artifact} to #{dest_file}"
+        $LOG.debug "#{log_prefix}#{outputFilename}: Copying #{artifact} to #{dest_file}"
         FileUtils.cp(artifact,dest_file)
       rescue Errno::ENOENT
-      	$LOG.debug "#{outputFilename}: #{artifact} does not exist."
+      	$LOG.debug "#{log_prefix}#{outputFilename}: #{artifact} does not exist."
       rescue SystemCallError => e
-        $LOG.error "#{outputFilename}: Failed to copy file from local m2 repository."
+        $LOG.error "#{log_prefix}#{outputFilename}: Failed to copy file from local m2 repository."
         $LOG.error e
       else #Yay we got it
-      	$LOG.debug "#{outputFilename}: Successfully copied from local m2 repository."
-        $LOG.info "[local]  #{outputFilename}"
+        $LOG.debug "#{log_prefix}#{outputFilename}: Successfully copied from local m2 repository."
+        $LOG.info "#{log_prefix}#{outputFilename}"
         return true
       end
       return false
@@ -126,11 +128,12 @@ module Winter
 
     #Depricated because its slow and expensive to use... leaving it here for now.
     def getMaven
-      c =  "exec mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get " 
+      log_prefix = "[maven]  "
+      c =  "mvn org.apache.maven.plugins:maven-dependency-plugin:2.5:get " 
       c << " -DremoteRepositories=#{@repositories.join(',').shellescape}" 
       c << " -Dtransitive=#{@transative}" 
       c << " -Dartifact=#{@group.shellescape}:#{@artifact.shellescape}:#{@version.shellescape}:#{@package.shellescape}" 
-      c << " -Ddest=#{dest_file.shellescape}"
+      c << " -Ddest=#{dest_file.shellescape} &>/dev/null"
 
       if @offline
         c << " --offline"
@@ -141,13 +144,12 @@ module Winter
         c << " -q"
       end
 
-      $LOG.debug c
       result = system( c )
       if result == false
-        $LOG.error("Failed to retrieve artifact: #{@group}:#{@artifact}:#{@version}:#{@package}")
+        $LOG.error("#{log_prefix}#{outputFilename}: Failed to retrieve artifact. -- #{c}")
       else
-        $LOG.info "#{@group}:#{@artifact}:#{@version}:#{@package}"
-        $LOG.debug dest_file
+        $LOG.info "#{log_prefix}#{@group}:#{@artifact}:#{@version}:#{@package}"
+        $LOG.debug "#{log_prefix}#{dest_file}"
       end
       return result
     end
