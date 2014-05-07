@@ -40,6 +40,7 @@ module Winter
 
       #@config['log.dir'] = File.join(WINTERFELL_DIR,RUN_DIR,@config['service'],'logs')
       @directives = {}
+      @arguments  = []
     end
 
     def start(winterfile, options)
@@ -68,6 +69,8 @@ module Winter
       @config['log.dir'] = File.join(@service_dir,'logs')
 
       @directives.merge! dsl[:directives]
+      $LOG.debug @arguments
+      @arguments = @arguments | dsl[:arguments]
 
       java_cmd = generate_java_invocation
       
@@ -126,7 +129,7 @@ module Winter
 
       # start building the command
       cmd = [ "exec #{java_bin.shellescape} -server" ] 
-      cmd << (@config["64bit"]==true ? " -d64 -XX:+UseCompressedOops":'')
+      cmd << (@config["64bit"]==true ? " -d64":'')
       cmd << " -XX:MaxPermSize=256m -XX:NewRatio=3"
       cmd << " -Xmx#{@config['jvm.mx']}" 
       cmd << opt("felix.fileinstall.dir", "#{@service_dir}/#{BUNDLES_DIR}")
@@ -147,6 +150,7 @@ module Winter
       cmd << opt("service.conf.dir", File.join(@service_dir, "conf"))
       cmd << opt(OPT_BUNDLE_DIR,     "#{@service_dir}/bundles")
       cmd << add_directives( @directives )
+      cmd << add_arguments( @arguments )
       cmd << @config["osgi.shell.telnet.ip"]?" -Dosgi.shell.telnet.ip=#{@config["osgi.shell.telnet.ip"]}":''
       #cmd.push(add_code_coverage())
       cmd << (@config["jdb.port"] ? " -Xdebug -Xrunjdwp:transport=dt_socket,address=#{@config["jdb.port"]},server=y,suspend=n" : '')
@@ -165,6 +169,15 @@ module Winter
         if value
           tmp << "="+Shellwords.escape(value.to_s)
         end
+      end
+      tmp
+    end
+
+    # raw java arguments
+    def add_arguments( args=[] )
+      tmp = ""
+      args.each do |key|
+        tmp << " #{Shellwords.escape(key.to_s)}"
       end
       tmp
     end

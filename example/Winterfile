@@ -30,3 +30,4 @@ bundle 'com.liveops.sample', 'sample', '1.0.0-SNAPSHOT'
 
 directive 'add.test.directive', 60
 
+argument '-Xmx1g'

@@ -32,17 +32,24 @@ describe Winter do
   describe "Fetch a jar" do
     it "Fetches a jar from a URL" do
       begin 
-        lambda {
-          cli = Winter::CLI.new
-          cli.fetch 'com.liveops.sample', 'sample', '1.0.0-SNAPSHOT'
-          #cli.fetch 'http://artifactory:8081/artifactory/libs-all/', 'sample', '1.0.0-SNAPSHOT'
-        }.should_not raise_error
+        FileUtils.mkdir_p("spec/tmp")
+        Dir.chdir "spec/tmp" do
+          lambda {
+            cli = Winter::CLI.new
+            cli.fetch 'com.liveops.sample', 'sample', '1.0.0-SNAPSHOT'
+            #cli.fetch 'http://artifactory:8081/artifactory/libs-all/', 'sample', '1.0.0-SNAPSHOT'
+          }.should_not raise_error
+        end
       end
+    end
+
+    after do
+      FileUtils.rm_r( "spec/tmp" )
     end
   end
 
   describe "validate" do
-    it "Reads a local pom file" do
+    it "Reads a local Winterfile" do
       begin
         lambda {
           cli = Winter::CLI.new
