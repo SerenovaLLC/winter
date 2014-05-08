@@ -16,6 +16,7 @@ require 'winter/logger'
 require 'fileutils'
 require 'digest/md5'
 require 'net/http'
+require 'nori'
 
 module Winter
 
@@ -57,9 +58,23 @@ module Winter
       end
       return success
     end
-    
-    def artifactory_path
-      "#{@group.gsub(/\./,'/')}/#{@artifact}/#{@version}/#{@artifact}-#{@version}.#{@package}"
+   
+    def resolve_snapshot_name(maven_metadata)
+      parser = Nori.new
+      meta = parser.parse(maven_metadata)
+      ts = meta['metadata']['versioning']['snapshot']['timestamp']
+      bn = meta['metadata']['versioning']['snapshot']['buildNumber']
+      "#{ts}-#{bn}"
+    end
+
+    def metadata_path
+      "#{@group.gsub(/\./,'/')}/#{@artifact}/#{@version}/maven-metadata.xml"
+    end
+
+    def generate_artifactory_path(meta = nil)
+      real_version = @version
+      real_version = @version.gsub(/SNAPSHOT/){ |s| resolve_snapshot_name(meta) } if meta != nil #MVN 3 uses unique names
+      "#{@group.gsub(/\./,'/')}/#{@artifact}/#{@version}/#{@artifact}-#{real_version}.#{@package}"
     end
 
     def dest_file
@@ -75,10 +90,13 @@ module Winter
     
     def getRestArtifactory 
       log_prefix = '[remote] '
+      artifactory_path = generate_artifactory_path
+
       $LOG.debug "#{log_prefix}#{outputFilename}: Attempting to fetch via the artifactory rest api."
       #Loop through all the repos until something works
       @repositories.each { |repo| 
         begin
+          artifactory_path = generate_artifactory_path(restRequest(URI.parse("#{repo}/#{metadata_path}"))) if @version.include?("SNAPSHOT")
           open(dest_file,"wb") { |file|
             file.write(restRequest(URI.parse("#{repo}/#{artifactory_path}")))
           }
@@ -87,6 +105,7 @@ module Winter
           $LOG.debug e
           next
         end 
+
         #Check to make sure the md5sum of what we downloaded matches what's in the artifactory.
         begin
           artifactory_md5 = restRequest(URI.parse("#{repo}/#{artifactory_path}.md5"))
@@ -109,8 +128,11 @@ module Winter
     
     def getLocalM2 
       log_prefix = "[local]  "
+      local_repo = "#{ENV["HOME"]}/.m2/repository"
       begin
-        artifact = "#{ENV["HOME"]}/.m2/repository/#{artifactory_path}"
+        artifactory_path = generate_artifactory_path 
+        artifactory_path = generate_artifactory_path(File.read("#{local_repo}/#{metadata_path}")) if @version.include?("SNAPSHOT")
+        artifact = "#{local_repo}/#{artifactory_path}"
         $LOG.debug "#{log_prefix}#{outputFilename}: Copying #{artifact} to #{dest_file}"
         FileUtils.cp(artifact,dest_file)
       rescue Errno::ENOENT
