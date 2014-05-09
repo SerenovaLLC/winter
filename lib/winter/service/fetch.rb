@@ -51,7 +51,7 @@ module Winter
       dep.transative    = true
       dep.destination   = File.join('.')
 
-      dep.getMaven
+      dep.get
 
       extract_jar "#{artifact}-#{version}.jar"
     end
