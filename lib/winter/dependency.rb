@@ -59,12 +59,13 @@ module Winter
       return success
     end
    
-    def resolve_snapshot_name(maven_metadata)
+    def determine_repo_artifact_name(maven_metadata)
+      return @version if maven_metadata == nil
       parser = Nori.new
       meta = parser.parse(maven_metadata)
       ts = meta['metadata']['versioning']['snapshot']['timestamp']
       bn = meta['metadata']['versioning']['snapshot']['buildNumber']
-      "#{ts}-#{bn}"
+      @version.gsub(/SNAPSHOT/){ |s| "#{ts}-#{bn}" } 
     end
 
     def metadata_path
@@ -72,9 +73,7 @@ module Winter
     end
 
     def generate_artifactory_path(meta = nil)
-      real_version = @version
-      real_version = @version.gsub(/SNAPSHOT/){ |s| resolve_snapshot_name(meta) } if meta != nil #MVN 3 uses unique names
-      "#{@group.gsub(/\./,'/')}/#{@artifact}/#{@version}/#{@artifact}-#{real_version}.#{@package}"
+      "#{@group.gsub(/\./,'/')}/#{@artifact}/#{@version}/#{@artifact}-#{determine_repo_artifact_name(meta)}.#{@package}"
     end
 
     def dest_file
