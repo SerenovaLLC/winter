@@ -50,8 +50,6 @@ module Winter
       #Try and get file in a couple different ways. If we succeed then move on. 
       #Artifacts in your local .m2 ALWAYS take precedence over a remote artifact...
       #Unless we fail so hard we end up using mvn as a last ditched effort. 
-      return getMaven
-      
       success = getLocalM2
       success = getRestArtifactory if ! success and ! @offline 
       success = getMaven if ! success and system( 'which mvn > /dev/null' ) 
