@@ -5,8 +5,8 @@ gemspec
 
 gem 'thor'
 gem 'bundler'
-
 gem 'multi_json'
+gem 'nori'
 
 group :test do
   gem 'json', '~> 1.7.7'
