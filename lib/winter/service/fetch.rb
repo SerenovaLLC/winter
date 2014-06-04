@@ -51,7 +51,7 @@ module Winter
       dep.transative    = true
       dep.destination   = File.join('.')
 
-      dep.getMaven
+      dep.get or raise "Failed to fetch jar."
 
       extract_jar "#{artifact}-#{version}.jar"
     end
