@@ -35,6 +35,7 @@ module Winter
       @options      = options
       @config       = {}
       @directives   = {}
+      @arguments    = []
       @felix        = nil
     end
 
@@ -62,6 +63,7 @@ module Winter
       end
 
       {
+        :arguments    => @arguments,
         :config       => @config,
         :dependencies => @dependencies,
         :felix        => @felix,
@@ -84,6 +86,10 @@ module Winter
 
     def info( msg=nil )
       $LOG.info msg
+    end
+
+    def argument( value )
+      @arguments << value
     end
 
     def directive( key, value=nil )
