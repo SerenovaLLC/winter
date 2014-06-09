@@ -30,4 +30,14 @@ bundle 'com.liveops.sample', 'sample', '1.0.0-SNAPSHOT'
 
 directive 'add.test.directive', 60
 
-argument '-Xmx1g'
+argument :max_memory => "-Xmx#{@config['jvm.mx']}"
+argument :initial_memory => "-Xms#{@config['jvm.mx']}"
+
+group :highmem do
+  argument :max_memory => "-Xmx2g"
+  argument :initial_memory => "-Xms2g"
+end
+
+info @config
+info @directives
+info @arguments

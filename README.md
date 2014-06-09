@@ -173,10 +173,13 @@ Display version information.
   Specify an application bundle to deploy into the OSGi container. If `version` is not speicfied, it will default to `LATEST`. The 4th parameter is a block that can be used to specify the packaging type (defaults to 'jar'). For example, if the bundle is packaged as a war file, the block can read `{:package => 'war'}`. Bundles added the Winterfile will be downoaded and placed in the './run/{name}/bundles' directory (relative to the Winterfile) when `winter build` is performed.
 
 ####conf (directory)
-  The contents of this directory tree is read and any file ending in '*.erb' is parsed as a template. The result of the template is placed in './run/{name}/conf' (relative to the Winterfile) and will overwrite any files that already exist there.
+  The contents of this directory tree is read and any file ending in '\*.erb' is parsed as a template. The result of the template is placed in './run/{name}/conf' (relative to the Winterfile) and will overwrite any files that already exist there.
 
 ####directive (key, [value])
-  Add a directive to the java invocation. `directive 'com.example.logger', 'true'` is translated to ` -D com.example.logger=true`.
+  Add a directive to the java invocation. `directive 'com.example.logger', 'true'` is translated to ` -Dcom.example.logger=true`. WARNING: This feature is deprecated and will be removed in a later version.
+
+####argument (:name => value)
+  Add an attribute to the java invocation. `attribute :attribute_name => "attribute value"` is translated to ` attribute value`. Attributes must have a named symbol so they can be overridden. In this example ":attribute\_name" is the name of the attribute.
 
 ####felix (group, artifact, [version])
   Specify the felix version to use. If none is specified, felix version 3.0.6 is added by default.

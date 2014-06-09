@@ -55,7 +55,7 @@ module Winter
             $LOG.info("Waiting for the process with pid #{pid} to stop")
             sleep 1 while Process.kill(0,pid)
           rescue => e
-            $LOG.info("The container seems to have exited.")
+            $LOG.info("The container has exited.")
           end
         else
           $LOG.info("An invalid pid value was found in the pid file. (\"#{pid_string}\" was parsed as #{pid})")

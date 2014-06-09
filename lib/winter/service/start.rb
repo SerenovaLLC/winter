@@ -40,7 +40,7 @@ module Winter
 
       #@config['log.dir'] = File.join(WINTERFELL_DIR,RUN_DIR,@config['service'],'logs')
       @directives = {}
-      @arguments  = []
+      @arguments  = {}
     end
 
     def start(winterfile, options)
@@ -69,8 +69,8 @@ module Winter
       @config['log.dir'] = File.join(@service_dir,'logs')
 
       @directives.merge! dsl[:directives]
-      $LOG.debug @arguments
-      @arguments = @arguments | dsl[:arguments]
+      @arguments.merge! dsl[:arguments]
+      #@arguments = @arguments | dsl[:arguments]
 
       java_cmd = generate_java_invocation
       
@@ -174,10 +174,10 @@ module Winter
     end
 
     # raw java arguments
-    def add_arguments( args=[] )
+    def add_arguments( args={} )
       tmp = ""
-      args.each do |key|
-        tmp << " #{Shellwords.escape(key.to_s)}"
+      args.each do |key, value|
+        tmp << " #{Shellwords.escape(value.to_s)}"
       end
       tmp
     end
