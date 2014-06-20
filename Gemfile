@@ -6,7 +6,7 @@ gemspec
 gem 'thor'
 gem 'bundler'
 gem 'multi_json'
-gem 'nori'
+gem 'xml-simple'
 
 group :test do
   gem 'json', '~> 1.7.7'
