@@ -35,7 +35,7 @@ module Winter
       @options      = options
       @config       = {}
       @directives   = {}
-      @arguments    = []
+      @arguments    = {}
       @felix        = nil
     end
 
@@ -89,7 +89,7 @@ module Winter
     end
 
     def argument( value )
-      @arguments << value
+      @arguments.merge! value
     end
 
     def directive( key, value=nil )
