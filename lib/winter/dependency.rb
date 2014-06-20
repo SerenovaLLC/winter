@@ -16,7 +16,7 @@ require 'winter/logger'
 require 'fileutils'
 require 'digest/md5'
 require 'net/http'
-require 'nori'
+require 'xmlsimple'
 
 module Winter
 
@@ -161,10 +161,10 @@ module Winter
    
     def determine_repo_artifact_name(maven_metadata)
       return @version if maven_metadata == nil
-      parser = Nori.new
-      meta = parser.parse(maven_metadata)
-      ts = meta['metadata']['versioning']['snapshot']['timestamp']
-      bn = meta['metadata']['versioning']['snapshot']['buildNumber']
+      
+      data = XmlSimple.xml_in(maven_metadata)
+      ts = data['versioning'][0]['snapshot'][0]['timestamp'][0]
+      bn = data['versioning'][0]['snapshot'][0]['buildNumber'][0]
       @version.gsub(/SNAPSHOT/){ |s| "#{ts}-#{bn}" } 
     end
 
