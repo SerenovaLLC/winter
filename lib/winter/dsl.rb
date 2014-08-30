@@ -23,6 +23,7 @@ require 'winter/constants'
 require 'winter/dependency'
 require 'winter/logger'
 require 'winter/templates'
+require 'facter'
 
 module Winter
   class DSL
@@ -156,6 +157,17 @@ module Winter
     end
 
     def read( file )
+      #Get stuff from some source that can divine host info because otherwise
+      #we're cripple and obviously totally useless as a provisioner/configuration manager...
+      #Should probabaly make this generic so that we can
+      #extend this to grab 'facts' from other places like ohai but that's out of scope for now
+      ts = Time.now.to_i
+      facts = {}
+      Facter.each do |k,v|
+        facts[k] = v
+      end
+      facts['facts_gathered_ts'] = ts
+      @config['facts'] = facts
       if File.exist?(file)
         @config.merge!( JSON.parse(File.read file ))
       else
