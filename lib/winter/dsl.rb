@@ -23,6 +23,7 @@ require 'winter/constants'
 require 'winter/dependency'
 require 'winter/logger'
 require 'winter/templates'
+require 'facter'
 
 module Winter
   class DSL
@@ -33,10 +34,21 @@ module Winter
       @repositories = []
       @dependencies = []
       @options      = options
-      @config       = {}
       @directives   = {}
       @arguments    = {}
       @felix        = nil
+      #Get stuff from some source that can divine host info because otherwise
+      #we're cripple and obviously totally useless as a provisioner/configuration 
+      #manager...
+      #Should probabaly make this generic so that we can
+      #extend this to grab 'facts' from other places like ohai but 
+      #that's out of scope for now
+      ts = Time.now.to_i
+      @config = {}
+      Facter.each do |k,v|
+        @config[k] = v
+      end
+      @config['facts_gathered_ts'] = ts
     end
 
     def self.evaluate( winterfile, options={} )

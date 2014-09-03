@@ -60,25 +60,56 @@ module Winter
     end
 
     def getLocalM2 
-      log_prefix = "[local]  #{outputFilename}"
       local_repo = "#{ENV["HOME"]}/.m2/repository"
+      local_meta = "#{local_repo}/#{local_metadata_path}"
+      log_prefix = "[local]  #{outputFilename}"
+      success = false
       begin
-        artifactory_path = get_repo_path 
-        artifactory_path = get_repo_path(File.read("#{local_repo}/#{metadata_path}")) if @version.include?("SNAPSHOT")
+        artifactory_path = get_repo_path
         artifact = "#{local_repo}/#{artifactory_path}"
+        $LOG.debug "#{artifact}" 
+        $LOG.debug "#{local_meta}"
+        #This should really be parsing the metadata and basing how we handle it on its version
+        #For now so that we're compatible with old mvn we just grab it if we found it the old way and parse only if we miss. :(
+        if @version.include?("SNAPSHOT") && ! File.exists?(artifact) && File.exists?(local_meta)
+          artifactory_path = get_repo_path(File.read(local_meta))
+          artifact = "#{local_repo}/#{artifactory_path}"
+        end
         $LOG.debug "#{log_prefix}: Copying #{artifact} to #{dest_file}"
-        FileUtils.cp(artifact,dest_file)
+        cp_tries = 0 
+        #Its insane that cp can fail without barfing an error... 
+        ##but apparantly it can so lets md5sum our way to and loop to victory (hopefully).
+        #I kinda feel like the bug this fixes has do to with the ruby io bufferering and old versions of ruby... but I don't have time to delve in
+        while ! success && cp_tries < 3
+          FileUtils.copy(artifact,dest_file)
+          dest_md5 = Digest::MD5.file("#{dest_file}").hexdigest
+          src_md5  = Digest::MD5.file("#{artifact}").hexdigest 
+          if dest_md5 != src_md5
+            $LOG.debug "md5sum #{dest_file} #{artifact} :( #{dest_md5} == #{src_md5}" #This is insane. 
+            cp_tries += 1 
+            next
+          end
+          success = true
+        end
       rescue Errno::ENOENT
       	$LOG.debug "#{log_prefix}: #{artifact} does not exist."
       rescue SystemCallError => e
-        $LOG.error "#{log_prefix}: Failed to copy file from local m2 repository."
-        $LOG.error e
+        $LOG.debug "#{log_prefix}: Failed to copy file from local m2 repository."
+        $LOG.debug e
+      rescue NoMethodError => e
+        $LOG.debug "#{log_prefix}: Something went wrong while fetching #{@artifact} #{@group} #{@version} Failed (probably while parsing the metadata in #{local_meta} its probably an old format)"
       else #Yay we got it
-        $LOG.debug "#{log_prefix}: Successfully copied from local m2 repository."
-        $LOG.info "#{log_prefix}"
-        return true
+        if ! success 
+          $LOG.debug "#{log_prefix}: Copy operation failed 3 times... Which is insane..."  
+          $LOG.debug "#{log_prefix}: Deleting the 'bad' jar and moving on." 
+          FileUtils.rm(dest_file)
+        else 
+          $LOG.debug "#{log_prefix}: Successfully copied from local m2 repository."
+          $LOG.info "#{log_prefix}"
+          return success
+        end
       end
-      return false
+      return success 
     end
 
     def getRestArtifactory 
@@ -93,7 +124,7 @@ module Winter
             file.write(restRequest(URI.parse("#{repo}/#{artifactory_path}")))
           }
         rescue SocketError,RuntimeError => e # :( Maybe do better handling later. 
-          $LOG.error "#{log_prefix}: Failed to fetch Artifact #{repo}/#{artifactory_path}"  
+          $LOG.debug "#{log_prefix}: Failed to fetch Artifact #{repo}/#{artifactory_path}"  
           $LOG.debug e
           next
         end 
@@ -110,8 +141,8 @@ module Winter
             $LOG.info "#{log_prefix}"
             return true 
           end
-          $LOG.error "#{log_prefix}: Remote md5 #{artifactory_md5} didn't match #{my_md5}" 
-          $LOG.error "#{log_prefix}: Deleting the 'bad' jar and moving on." 
+          $LOG.debug "#{log_prefix}: Remote md5 #{artifactory_md5} didn't match #{my_md5}" 
+          $LOG.debug "#{log_prefix}: Deleting the 'bad' jar and moving on." 
           FileUtils.rm(dest_file)
         end
       }
@@ -147,6 +178,10 @@ module Winter
       return result
     end
     
+    def local_metadata_path
+      "#{@group.gsub(/\./,'/')}/#{@artifact}/#{@version}/maven-metadata-local.xml"
+    end
+    
     def metadata_path
       "#{@group.gsub(/\./,'/')}/#{@artifact}/#{@version}/maven-metadata.xml"
     end
@@ -161,7 +196,6 @@ module Winter
    
     def determine_repo_artifact_name(maven_metadata)
       return @version if maven_metadata == nil
-      
       data = XmlSimple.xml_in(maven_metadata)
       ts = data['versioning'][0]['snapshot'][0]['timestamp'][0]
       bn = data['versioning'][0]['snapshot'][0]['buildNumber'][0]
