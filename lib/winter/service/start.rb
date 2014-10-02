@@ -92,20 +92,28 @@ module Winter
       # to '/'. So, we'll just leave the CWD alone.
       #Process.daemon(Dir.getwd,nil)
       
-      exec(java_cmd) if @config['daemonize'] #Let the child eat winter so things are awesome for daemontools
+      #Let the child eat winter so things are awesome for daemontools
+      if @config['daemonize'] 
+        write_pid( Process.pid )
+        exec(java_cmd) 
+      end
       #We never hit the past this point if  we went to daemonize mode.
       
-      #If we're not trying to run as a daemon just fork and let the subprocess be eaten
+      # If we're not trying to run as a daemon just fork and let the subprocess 
+      # be eaten
       java_pid = fork do
         exec(java_cmd)
       end
 
-      pid_file = File.open(File.join(@service_dir, "pid"), "w")
-      pid = java_pid
-      pid_file.write(pid)
-      pid_file.close      
+      write_pid( java_pid )
 
       $LOG.info "Started #{@config['service']} (#{pid})"
+    end
+
+    def write_pid( pid )
+      pid_file = File.open(File.join(@service_dir, "pid"), "w")
+      pid_file.write(pid)
+      pid_file.close      
     end
 
     def find_java
